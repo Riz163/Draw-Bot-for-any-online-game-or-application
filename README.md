@@ -12,7 +12,7 @@ features:
 * colored dithering
 * black and white dithering
 * settings for colors, brushsize, speed and drawing area
-* uses image url
+* uses image URL
 
 run it via cmd or in your python ide and it should install all the requirements on its own\
 make sure to calibrate it before drawing by selecting settings (first 2 are most important)\
