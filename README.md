@@ -1,5 +1,5 @@
 # Draw-Bot-for-any-online-game-or-application
-works on anything with a canvas, a constant brush size and and colors\
+works on anything with a canvas, a constant brush size and and colors
 
 for eg:
 * skribbl.io
