@@ -20,6 +20,8 @@ if any emergencies occour, press "q" to trigger the failsafe
 
 I recommend using clipart images for faster drawing times\
 
+https://www.youtube.com/watch?v=s9wIJb-HGWI
+
 Examples:
 
 ![redFanta1](https://user-images.githubusercontent.com/108233076/175929241-bef148d2-a90e-485b-8a31-4ef41c9a9749.gif)
