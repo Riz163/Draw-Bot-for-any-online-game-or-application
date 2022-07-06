@@ -18,9 +18,7 @@ run it via cmd or in your python ide and it should install all the requirements 
 make sure to calibrate it before drawing by selecting settings (first 2 are most important)\
 if any emergencies occour, press "q" to trigger the failsafe
 
-I recommend using clipart images for faster drawing times\
-
-https://www.youtube.com/watch?v=s9wIJb-HGWI
+I recommend using clipart images for faster drawing times
 
 Examples:
 

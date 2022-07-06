@@ -62,8 +62,17 @@ def cannyOption():
         try:
             response = requests.get(f"{value}")
             image_bytes = io.BytesIO(response.content) # gets the image from the url
-            im = Image.open(image_bytes).convert('RGB')
+            im = Image.open(image_bytes).convert("RGBA")
             print("Processing Image...")
+            fill_color = (255, 255, 255)
+
+            if im.mode in ('RGBA', 'LA'):
+                background = Image.new(im.mode[:-1], im.size,
+                                       fill_color)  # idk how this works but it puts a white background
+                background.paste(im, im.split()[-1])  # on png images aswell
+                im = background
+            im.convert("RGB")
+
             width, height = im.size
 
             if width > canvas_x: # resizing without stretching the image
@@ -453,7 +462,7 @@ def calibrate(): # settings - Im using text files to store them and there is pro
         elif res == "3":
             speed = open("settings\speed.txt", "w")
             print("0 (slow) - 100 (fast)") # 100 is the fastest for canny but for the dithering youd have to change sth in line
-                                            # 486 for maximum speed but I dont recommend that
+                                            # 507 for maximum speed but I dont recommend that
             sped = input("Enter your desired speed\n")
             speed.write(f"{sped}\n")
             speed.close()
