@@ -1,7 +1,7 @@
 import io
 while True:
     try:
-        import os, sys, json, time, turtle  # Base modules
+        import os, sys, time  # Base modules
         import ait, cv2, numpy, pyautogui, requests, keyboard, mouse, pyscreeze  # Dependencies
         import pynput.mouse as ms
         from PIL import Image
