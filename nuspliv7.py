@@ -220,7 +220,7 @@ def ditheroption(image, palettedata):
         a += 3
         v += 1
     # the data is ready now...
-    #os.remove("img_dither.png")  # hide the evidence O_o
+    os.remove("img_dither.png")  # hide the evidence O_o
 
     def drawFS1(e, c):  # this draws all the pixels of one color (e) divided by c for the layers
         cc = 3 * speeed
@@ -459,25 +459,25 @@ def quantizeOption(image, palettedata):
                        int(pixels[e][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                        absolute=True, duration=0)
             mouse.press(button='left')  # here I am holding down the mouse button, instead of clicking on every pixel
+
             if c < len(pixels[e]) - 2:  # I drag the mouse along all connected pixels to make it faster
-                if pixels[e][c] + 1 == pixels[e][c + 2]:
+                if pixels[e][c+1] + 1 == pixels[e][c + 3]:
                     count = 0
-                    while pixels[e][c + count] < pixels[e][c + 1 + count]:
+                    while True:
                         if keyboard.is_pressed('q'):  # Failsafe
                             break
                         try:
-                            if pixels[e][c + count] + 1 == pixels[e][
-                                c + count + 2]: # I don't understand it but this is the only way I could make it work ...
-                                mouse.move(int(pixels[e][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
-                                           int(pixels[e][c + count + 1] * pp + offset_y + int(
-                                               (canvas_y - height * pp) / 2)),
-                                           absolute=True, duration=0)
+                            if pixels[e][c + 1 + count] + 1 == pixels[e][c + count + 3]:
+                            # looks weird but it works so I don't care
                                 count += 2
                             else:
-                                mouse.release(button='left')
                                 break
                         except:
                             break
+                    mouse.move(int(pixels[e][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
+                               int(pixels[e][c + count + 1] * pp + offset_y + int(
+                                   (canvas_y - height * pp) / 2)),
+                               absolute=True, duration=0)
 
             mouse.release(button='left')
 
@@ -603,7 +603,7 @@ def calibrate(): # settings - Im using text files to store them and there is pro
         elif res == "3":
             speed = open("settings\speed.txt", "w")
             print("0 (slow) - 100 (fast)") # 100 is the fastest for canny but for the dithering youd have to change sth in line
-                                            # 638 for maximum speed but I dont recommend that
+                                            # 658 for maximum speed but I dont recommend that
             sped = input("Enter your desired speed\n")
             speed.write(f"{sped}\n")
             speed.close()
