@@ -222,7 +222,7 @@ def ditheroption(image, palettedata, layers):
     os.remove("img_dither.png")  # hide the evidence O_o
 
     def drawFS1(b, c, layers):  # this draws all the pixels of one color (e) divided by c for the layers
-        cc = 3 * speeed
+        cc = speeed
         pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
         pyautogui.click()
         time.sleep(0.01)
@@ -260,7 +260,7 @@ def ditheroption(image, palettedata, layers):
 
             if c >= cc:  # this is where speed setting has an action
                 time.sleep(0.05)  # every time the number of drawn pixels is too high it pauses
-                cc += 3 * speeed
+                cc += speeed
 
     def drawFS2():
         z = 0
@@ -331,7 +331,7 @@ def ditheroption(image, palettedata, layers):
             print("")
             print("Drawing...")
             print("in case of any emergency press q to quit drawing")
-            if layers == 100: # when choosing adaptive I set layers to be 100 so this is where it checks for that
+            if layers == 314159: # when choosing adaptive I set layers to be 100 so this is where it checks for that
                 layers = 1
                 drawFS3(layers)
                 print("Finished !")
@@ -383,7 +383,7 @@ def ditheroptionblack(image):
 
     def drawblack():
         c = 0
-        cc = 3 * speeed
+        cc = speeed
         while c < len(pixelsBlack):
             if keyboard.is_pressed('q'):
                 print("Drawing interrupted")
@@ -395,7 +395,7 @@ def ditheroptionblack(image):
             c += 2
             if c == cc:
                 time.sleep(0.05)
-                cc += 3 * speeed
+                cc += speeed
 
     print("Image is ready, press d to start drawing")
     print("(or b to go back)")
@@ -520,7 +520,7 @@ def quantizeOption(image, palettedata):
     os.remove("img_quant.png")
 
     def drawQuantize1(b, c):
-        cc = 3 * speeed
+        cc = speeed
         pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
         pyautogui.click()
         time.sleep(0.01)
@@ -557,9 +557,9 @@ def quantizeOption(image, palettedata):
 
             c += layers * 2
 
-            if c >= cc:
+            if c >= cc: # delete this if its too slow
                 time.sleep(0.05)
-                cc += 3 * speeed
+                cc += speeed
 
     def drawQuantize2():
         z = 0
@@ -678,7 +678,7 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
             print("Saved...")
         elif res == "3":
             speed = open("settings\speed.txt", "w")
-            print("0 (slow) - 100 (fast)") # 100 is the fastest for canny but for the dithering youd have to change line 749
+            print("0 (slow) - 1000 (very fast) - ")
             sped = input("Enter your desired speed\n")
             speed.write(f"{sped}\n")
             speed.close()
@@ -705,7 +705,7 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
                     print("Saved...")
                     break
                 elif inp == "2":
-                    layers.write("100") # could be sth else
+                    layers.write("314159") # could be sth else
                     layers.close()
                     print("Saved...")
                     break
@@ -745,8 +745,8 @@ while True:
     spe = open("settings\speed.txt", "r")
     for posi in spe:
         speed.append(int(posi))
-    cannyspeed = (100 - speed[0]) / 1000
-    speeed = speed[0] # speed = 0 for maximum speed
+    cannyspeed = (1000 - speed[0]) / 10000
+    speeed = speed[0] # speed > 1000 for maximum speed
 
     brush = []
     bru = open("settings\Brush.txt", "r")
