@@ -211,6 +211,16 @@ def ditheroption(image, palettedata, layers):
                     pixels[v].append(i)
                     pixels[v].append(j)
 
+    length = len(palettedata) - 3  # -3 for white because white is the background color (if not simply do click on white while calibrating)
+    a = 0
+    v = 0
+    while a < length:
+        getcoords()
+        a += 3
+        v += 1
+    # the data is ready now...
+    os.remove("img_dither.png")  # hide the evidence O_o
+
     def drawFS1(b, c, layers):  # this draws all the pixels of one color (e) divided by c for the layers
         cc = 3 * speeed
         pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
@@ -283,44 +293,32 @@ def ditheroption(image, palettedata, layers):
                 print("Drawing interrupted")
                 break
             try:
-                if e > int(me * 2 / 3): # <-- the last numbers determine which colors should
+                if e > int(sth * 2/3): # <-- the last number determines which colors should
                     layers = 2 # be split in 2 layers here for eg 1 - 2/3 = 1/3, so the last 1/3 of the colors will be
-                    # drawn twice. the latest colors are the ones with the most pixels because they get sorted in that way
+                    c = 4 # drawn twice. the latest colors are the ones with the most pixels because they get sorted in that way
                     drawFS1(b, c, layers)# you can experiment with that number..
-                    e += 1
                     bb.append(b)
+                    e += 1
                 elif len(pixels[b]) > 2:
                     drawFS1(b, c, layers)
                     e += 1
                 b += 1
             except:
                 break
-        oli = 0
-        c = 4
-        while oli < len(bb):
-            drawFS1(bb[oli], c, layers)
-            oli += 1
-
-    length = len(palettedata) - 3  # -3 for white because white is the background color (if not simply do click on white while calibrating)
-    a = 0
-    v = 0
-    while a < length:
-        getcoords()
-        a += 3
-        v += 1
-
-    me = 0
-    oli = 0
-    while oli < length:
-        if len(pixels[me]) != 2: # amount of colors that are actually used
-            me += 1
-        oli += 1
-
-    # the data is ready now...
-    os.remove("img_dither.png")  # hide the evidence O_o
+        e = 0
+        c = 2
+        while e < int(sth * 2/3):
+            drawFS1(bb[e], c, layers)
+            e += 1
 
     pixels.sort(key=len) # here its sorts all color entries in pixels by their lenght to draw the ones with less colors first
     # as they are likely to be the outlines so that its easier to recognize the drawing fast
+
+    sth = 0
+    for ol in pixels:
+        if len(ol) > 2:
+            sth += 1
+
     print("Image is ready, press d to start drawing")
     print("(or b to go back)")
     while True:
@@ -674,7 +672,7 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
             print("Saved...")
         elif res == "3":
             speed = open("settings\speed.txt", "w")
-            print("0 (slow) - 100 (fast)") # 100 is the fastest for canny but for the dithering youd have to change line 732
+            print("0 (slow) - 100 (fast)") # 100 is the fastest for canny but for the dithering youd have to change line 743
             sped = input("Enter your desired speed\n")
             speed.write(f"{sped}\n")
             speed.close()
