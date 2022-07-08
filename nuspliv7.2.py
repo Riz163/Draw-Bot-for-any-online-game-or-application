@@ -277,6 +277,7 @@ def ditheroption(image, palettedata, layers):
         e = 0
         b = 0
         c = 2
+        bb = []
         while e < int((len(palettedata) - 3) / 3):
             if keyboard.is_pressed('q'):  # Failsafe
                 print("Drawing interrupted")
@@ -284,17 +285,21 @@ def ditheroption(image, palettedata, layers):
             try:
                 if e > int(me * 2 / 3): # <-- the last numbers determine which colors should
                     layers = 2 # be split in 2 layers here for eg 1 - 2/3 = 1/3, so the last 1/3 of the colors will be
-                    c = 4 # drawn twice. the latest colors are the ones with the most pixels because they get sorted in that way
+                    # drawn twice. the latest colors are the ones with the most pixels because they get sorted in that way
                     drawFS1(b, c, layers)# you can experiment with that number..
-                    c = 2
-                    drawFS1(b, c, layers)
                     e += 1
+                    bb.append(b)
                 elif len(pixels[b]) > 2:
                     drawFS1(b, c, layers)
                     e += 1
                 b += 1
             except:
                 break
+        oli = 0
+        c = 4
+        while oli < len(bb):
+            drawFS1(bb[oli], c, layers)
+            oli += 1
 
     length = len(palettedata) - 3  # -3 for white because white is the background color (if not simply do click on white while calibrating)
     a = 0
