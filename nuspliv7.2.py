@@ -307,9 +307,13 @@ def ditheroption(image, palettedata, layers):
                 break
         e = 0
         c = 2
-        while e < int(sth * 2/3):
-            drawFS1(bb[e], c, layers)
-            e += 1
+        while True:
+            try:
+                while True:
+                    drawFS1(bb[e], c, layers)
+                    e += 1
+            except:
+                break
 
     pixels.sort(key=len) # here its sorts all color entries in pixels by their lenght to draw the ones with less colors first
     # as they are likely to be the outlines so that its easier to recognize the drawing fast
@@ -330,10 +334,12 @@ def ditheroption(image, palettedata, layers):
             if layers == 100: # when choosing adaptive I set layers to be 100 so this is where it checks for that
                 layers = 1
                 drawFS3(layers)
+                print("Finished !")
+                break
             else:
                 drawFS2()
-            print("Finished !")
-            break
+                print("Finished !")
+                break
         if keyboard.is_pressed('b'):
             print("")
             break
@@ -672,7 +678,7 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
             print("Saved...")
         elif res == "3":
             speed = open("settings\speed.txt", "w")
-            print("0 (slow) - 100 (fast)") # 100 is the fastest for canny but for the dithering youd have to change line 743
+            print("0 (slow) - 100 (fast)") # 100 is the fastest for canny but for the dithering youd have to change line 749
             sped = input("Enter your desired speed\n")
             speed.write(f"{sped}\n")
             speed.close()
