@@ -1,7 +1,6 @@
-import io
 while True:
     try:
-        import os, sys, time # Base modules
+        import os, sys, time, io  # Base modules
         import ait, cv2, numpy, pyautogui, requests, keyboard, mouse, pyscreeze  # Dependencies
         import pynput.mouse as ms
         from PIL import Image
@@ -9,22 +8,26 @@ while True:
         from turtle import mode, Terminator
 
         break
+
     except ImportError:
         dep = ["pynput", "autoit", "numpy", "opencv-python", "pyautogui",
                "pillow", "requests", "keyboard", "mouse", "pyscreeze"]  # For every dep added put it in this list
-        print("Import error\nDownloading dependencies")
+        print("Import error\nDownloading dependencies...")
         time.sleep(3)
         for i in dep:
             os.system(f"cmd /c pip install {i}")
 
-# important : changing your window size of the app/game can have an effect on the brushsize you need to use (for skribbl its 67% and 3 for brush size)
-# btw Im using an app called DeskPins to have the cmd or run window always stay on top and it helps a lot
-# also note that although the drawing might already be finished on your screen,
-# the website (or app) not being able to handle such fast inputs might display it slower for the other players
-# I am also not very experienced with programming (been at it for like 1 or 2 months and this is my first real project) so
-# if my code may look like shit im sorry, I tried to explain my thoughts a bit but I probably cant help with any errors...
-
+"""
+important : changing your window size of the app/game can have an effect on 
+the brush size you need to use (for skribbl its 67% and 3 for brush size for me)
+btw I'm using an app called DeskPins to have the cmd or run window always stay on top
+also note that although the drawing might already be finished on your screen,
+the website (or app) not being able to handle such fast inputs might display it slower for the other players
+I am also not very experienced with programming (been at it for like 1 or 2 months and this is my first real project) so
+if my code may look like shit im sorry, I tried to explain my thoughts a bit but I probably cant help with any errors...
+"""
 mou = ms.Controller()
+
 
 def getXandY(data, select):
     temp = str(data).split(",")
@@ -32,6 +35,7 @@ def getXandY(data, select):
         temp.remove("n")
 
     return int(temp[select])
+
 
 def drawCanny(pointArr):
     mou.position = (getXandY(pointArr[0], 0), getXandY(pointArr[0], 1))  # First entry is the start position
@@ -42,7 +46,7 @@ def drawCanny(pointArr):
             mou.position = (getXandY(pointArr[i], 0), getXandY(pointArr[i], 1))  # Position the mouse to the new area
             ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
 
-        if keyboard.is_pressed('q'): # Failsafe
+        if keyboard.is_pressed('q'):  # Failsafe
             print("Drawing interrupted")
             break
 
@@ -52,15 +56,15 @@ def drawCanny(pointArr):
         ait.move(mou.position[0], mou.position[1])
 
         mou.release(Button.left)
-        time.sleep(cannyspeed) # this is where the speed has an effect
+        time.sleep(cannyspeed)  # this is where the speed has an effect
 
     mou.release(Button.left)
 
-def cannyOption(image):
 
+def cannyOption(image):
     print("Processing Image...")
     im = image
-    fill_color = (255, 255, 255) # white
+    fill_color = (255, 255, 255)  # white
     if im.mode in ('RGBA', 'LA'):
         background = Image.new(im.mode[:-1], im.size, fill_color)  # puts a white background
         background.paste(im, im.split()[-1])  # on png images aswell
@@ -82,7 +86,7 @@ def cannyOption(image):
 
     outdata = []
     img = cv2.imread("i.png")
-    os.remove("i.png") # deleting it
+    os.remove("i.png")  # deleting it
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # grayscales the image to work better with the
     edges = cv2.Canny(gray, 75, 150)  # canny edge detection algorithm
@@ -112,13 +116,14 @@ def cannyOption(image):
             print("")
             break
 
+
 def ditheroption(image, palettedata, layers):
     print("Processing Image...")
     im = image
     fill_color = (255, 255, 255)
 
     if im.mode in ('RGBA', 'LA'):
-        background = Image.new(im.mode[:-1], im.size,fill_color)
+        background = Image.new(im.mode[:-1], im.size, fill_color)
         background.paste(im, im.split()[-1])
         im = background
     im.convert('RGB')
@@ -138,7 +143,7 @@ def ditheroption(image, palettedata, layers):
     dummy.putpalette(palettedata)
     image_dithered = image_halfresized.convert("RGB").quantize(palette=dummy)  # dithers the image with the palette of
     # the dummy image using floyd-steinberg dithering
-    image_dithered.save("img_dither.png")  # temporary save because pillow doesnt like mode P for getting the pixels
+    image_dithered.save("img_dither.png")  # temporary save because pillow doesn't like mode P for getting the pixels
 
     c0 = []
     c1 = []
@@ -180,7 +185,7 @@ def ditheroption(image, palettedata, layers):
     c37 = []
     c38 = []
     # if you want to use more colors, add more arrays here and put them in pixels
-    # (using less colors is no problem)
+    # (using fewer colors is no problem)
     pixels = [c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19, c20,
               c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32, c33, c34, c35, c36, c37, c38]  # <--
     coordinates = []
@@ -190,7 +195,7 @@ def ditheroption(image, palettedata, layers):
     w = 0
     t = 0
     while w < len(coordinates):
-        pixels[t].append(coordinates[w]) # and adds them to the pixel list for the right color
+        pixels[t].append(coordinates[w])  # and adds them to the pixel list for the right color
         pixels[t].append(coordinates[w + 1])
         t += 1
         w += 2
@@ -204,15 +209,16 @@ def ditheroption(image, palettedata, layers):
         green = color[1]
         blue = color[2]
 
-        for i in range(x):
-            for j in range(y):
+        for j in range(y):
+            for i in range(x):
                 r, g, b = image_dithered.getpixel((i, j))
                 if (r, g, b) == (red, green, blue):
                     pixels[v].append(i)
                     pixels[v].append(j)
 
-    length = len(palettedata) - 3  # -3 for white because white is the background color (if not simply do click on white while calibrating)
-    a = 0
+    length = len(
+        palettedata) - 3  # -3 for white because white is the background color
+    a = 0  # (if not simply do click on white while calibrating)
     v = 0
     while a < length:
         getcoords()
@@ -233,31 +239,8 @@ def ditheroption(image, palettedata, layers):
             mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - width * pp) / 2)),  # similar to canny option
                        int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),  # but upscaling
                        absolute=True, duration=0)  # with pp (brush size)
-            mouse.press(button='left')
-
-            if c < len(pixels[b]) - 2:  # I drag the mouse along all connected pixels to make it faster
-                if pixels[b][c+1] + 1 == pixels[b][c + 3]:
-                    count = 0
-                    while True:
-                        if keyboard.is_pressed('q'):  # Failsafe
-                            break
-                        try:
-                            if pixels[b][c + 1 + count] + 1 == pixels[b][c + count + 3]:
-                            # looks weird but it works so I don't care
-                                count += 2
-                            else:
-                                break
-                        except:
-                            break
-                    mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
-                               int(pixels[b][c + count + 1] * pp + offset_y + int(
-                                   (canvas_y - height * pp) / 2)),
-                               absolute=True, duration=0)
-
-            mouse.release(button='left')
-
+            mouse.click(button='left')
             c += layers * 2
-
             if c >= cc:  # this is where speed setting has an action
                 time.sleep(0.05)  # every time the number of drawn pixels is too high it pauses
                 cc += speeed
@@ -283,7 +266,7 @@ def ditheroption(image, palettedata, layers):
             z += 1
             # I know there are many variables and there is probably a better way, but it works I guess
 
-    def drawFS3(layers): # this is for the adaptive layer option
+    def drawFS3(layers):  # this is for the adaptive layer option
         e = 0
         b = 0
         c = 2
@@ -293,10 +276,10 @@ def ditheroption(image, palettedata, layers):
                 print("Drawing interrupted")
                 break
             try:
-                if e > int(sth * 2/3): # <-- the last number determines which colors should
-                    layers = 2 # be split in 2 layers here for eg 1 - 2/3 = 1/3, so the last 1/3 of the colors will be
-                    c = 4 # drawn twice. the latest colors are the ones with the most pixels because they get sorted in that way
-                    drawFS1(b, c, layers)# you can experiment with that number..
+                if e > int(sth * 2 / 3):  # <-- the last number determines which colors should
+                    layers = 2  # be split in 2 layers here for eg (1 - 2/3) = 1/3, so one third of the colors will be
+                    c = 4  # drawn twice. the latest colors are the ones with the most pixels because they get sorted
+                    drawFS1(b, c, layers)  # you can experiment with that number...
                     bb.append(b)
                     e += 1
                 elif len(pixels[b]) > 2:
@@ -315,11 +298,12 @@ def ditheroption(image, palettedata, layers):
             except:
                 break
 
-    pixels.sort(key=len) # here its sorts all color entries in pixels by their lenght to draw the ones with less colors first
-    # as they are likely to be the outlines so that its easier to recognize the drawing fast
+    pixels.sort(
+        key=len)  # here its sorts all color entries in pixels by their length to draw the ones with fewer colors first
+    # as they are likely to be the outlines so that it's easier to recognize the drawing fast
 
     sth = 0
-    for ol in pixels:
+    for ol in pixels:  # getting colors that are actually going to be used
         if len(ol) > 2:
             sth += 1
 
@@ -329,9 +313,9 @@ def ditheroption(image, palettedata, layers):
         time.sleep(0.05)
         if keyboard.is_pressed('d'):
             print("")
-            print("Drawing...")
+            print(f"Drawing... {sth} colors are being used")
             print("in case of any emergency press q to quit drawing")
-            if layers == 314159: # when choosing adaptive I set layers to be 100 so this is where it checks for that
+            if layers == 314159:  # when choosing adaptive I set layers to be 100 so this is where it checks for that
                 layers = 1
                 drawFS3(layers)
                 print("Finished !")
@@ -367,13 +351,13 @@ def ditheroptionblack(image):
     height = int(height / pp)
     image_halfresized = im.resize((width, height))
 
-    image_dithered = image_halfresized.convert('1')  # thats all you need for B/W dithering
+    image_dithered = image_halfresized.convert('1')  # that's all you need for B/W dithering
     image_dithered.save("img_dither.png")
     pixelsBlack = []
     image_dithered = Image.open("img_dither.png").convert('RGB')
     x, y = image_dithered.size
-    for i in range(x):
-        for j in range(y):
+    for j in range(y):
+        for i in range(x):
             r, g, b = image_dithered.getpixel((i, j))
             if (r, g, b) == (0, 0, 0):
                 pixelsBlack.append(i)
@@ -412,8 +396,10 @@ def ditheroptionblack(image):
             print("")
             break
 
+
 def quantizeOption(image, palettedata):
-    layers = 1 # no layers here im lazy and isnt worth it
+    print("Processing image...")
+    layers = 1  # no layers here im lazy and isnt worth it
     im = image
     fill_color = (255, 255, 255)
     if im.mode in ('RGBA', 'LA'):
@@ -436,7 +422,7 @@ def quantizeOption(image, palettedata):
     image_halfresized = im.resize((width, height))
     dummy = Image.new('P', (16, 16))
     dummy.putpalette(palettedata)
-    image_quantized = image_halfresized.convert("RGB").quantize(palette=dummy, dither=False) # no dithering this time
+    image_quantized = image_halfresized.convert("RGB").quantize(palette=dummy, dither=False)  # no dithering this time
     image_quantized.save("img_quant.png")
 
     c0 = []
@@ -502,8 +488,8 @@ def quantizeOption(image, palettedata):
         green = color[1]
         blue = color[2]
 
-        for i in range(x):
-            for j in range(y):
+        for j in range(y):
+            for i in range(x):
                 r, g, b = image_quant.getpixel((i, j))
                 if (r, g, b) == (red, green, blue):
                     pixels[v].append(i)
@@ -533,31 +519,34 @@ def quantizeOption(image, palettedata):
                        int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                        absolute=True, duration=0)
             mouse.press(button='left')  # here I am holding down the mouse button, instead of clicking on every pixel
-
+            count = 0
             if c < len(pixels[b]) - 2:  # I drag the mouse along all connected pixels to make it faster
-                if pixels[b][c+1] + 1 == pixels[b][c + 3]:
-                    count = 0
+                if pixels[b][c] + 1 == pixels[b][c + 2]:
+
                     while True:
                         if keyboard.is_pressed('q'):  # Failsafe
                             break
                         try:
-                            if pixels[b][c + 1 + count] + 1 == pixels[b][c + count + 3]:
-
+                            if pixels[b][c + count] + 1 == pixels[b][c + count + 2]:
                                 count += 2
                             else:
-                                break
+                                mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
+                                           int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
+                                           absolute=True, duration=0)
+                                time.sleep(0.05)
+                                break  # I don't know why this is needed 2 times, but it only worked like that...
                         except:
+                            mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
+                                       int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
+                                       absolute=True, duration=0)
+                            time.sleep(0.05)  # you can change this if it leaves too many gaps or is too slow
                             break
-                    mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
-                               int(pixels[b][c + count + 1] * pp + offset_y + int(
-                                   (canvas_y - height * pp) / 2)),
-                               absolute=True, duration=0)
 
             mouse.release(button='left')
 
-            c += layers * 2
+            c += 2 + count
 
-            if c >= cc: # delete this if its too slow
+            if c >= cc:  # and also delete this if it's too slow
                 time.sleep(0.05)
                 cc += speeed
 
@@ -577,11 +566,16 @@ def quantizeOption(image, palettedata):
                         e += 1
                     b += 1
                 except:
-                    break
+                    return e
             c += 2
             z += 1
 
     pixels.sort(key=len)
+
+    sth = 0
+    for ol in pixels:
+        if len(ol) > 2:
+            sth += 1
 
     print("Image is ready, press d to start drawing")
     print("(or b to go back)")
@@ -589,7 +583,7 @@ def quantizeOption(image, palettedata):
         time.sleep(0.05)
         if keyboard.is_pressed('d'):
             print("")
-            print("Drawing...")
+            print(f"Drawing... {sth} colors are being used")
             print("in case of any emergency press q to quit drawing")
             drawQuantize2()
             print("Finished !")
@@ -599,7 +593,7 @@ def quantizeOption(image, palettedata):
             break
 
 
-def calibrate(): # settings - I'm using text files to store them and there is probably also a better way but idk ...
+def calibrate():  # settings - I'm using text files to store them and there is probably a better way, but I don't know
     while True:
         print("What do you want to change ?")
         print("(1) color palette and positions")
@@ -616,26 +610,28 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
                     print("")
                     print("Calibration started...")
                     print("Click on every color you want to use !")
-                    print("Important - dont click on white !") # (if you do nothing bad happens and if the background isnt white you should)
+                    print(
+                        "Important - dont click on white !")  # (if you do nothing bad happens and if the background isn't white you should)
                     print("When you are finished press f to finish calibrating")
 
-                    screen = pyscreeze.screenshot() # screenshot to get the color on click
-                    palette = open("settings\colors_palette.txt", "w") # w is write mode
+                    screen = pyscreeze.screenshot()  # screenshot to get the color on click
+                    palette = open("settings\colors_palette.txt", "w")  # w is write mode
                     coordinates = open("settings\colors_coordinates.txt", "w")
                     while True:
-                        if mouse.is_pressed(button='left'): # on click
+                        if mouse.is_pressed(button='left'):  # on click
 
-                            pos = pyautogui.position() # gets the position to know where to click to select the color
+                            pos = pyautogui.position()  # gets the position to know where to click to select the color
                             coordinates.write(f"{pos[0]}\n")
                             coordinates.write(f"{pos[1]}\n")
 
-                            rr, gg, bb = screen.getpixel((pos[0], pos[1])) # gets the color of that position to know what
-                                                                            # to use for dithering
+                            rr, gg, bb = screen.getpixel(
+                                (pos[0], pos[1]))  # gets the color of that position to know what
+                            # to use for dithering
                             palette.write(f"{rr}\n")
                             palette.write(f"{gg}\n")
                             palette.write(f"{bb}\n")
 
-                            time.sleep(0.2) # otherwise its too fast and stores stuff twice or something
+                            time.sleep(0.2)  # otherwise it's too fast and stores stuff twice or something
 
                             print(f"clicked at {pos[0]}, {pos[1]} - color {rr}, {bb}, {gg}")
 
@@ -647,7 +643,7 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
                     break
                 time.sleep(0.05)
             print("Saved...")
-        elif res == "2": # just gets the coords for the canvas
+        elif res == "2":  # just gets the coords for the canvas
             print("open the game window and press s to start")
             while True:
                 if keyboard.is_pressed('s'):
@@ -672,7 +668,7 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
                             time.sleep(0.2)
                             break
                     print("Finished !")
-                    canvas.close
+                    canvas.close()
                     break
                 time.sleep(0.05)
             print("Saved...")
@@ -685,8 +681,9 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
             print("Saved...")
         elif res == "4":
             brush = open("settings\Brush.txt", "w")
-            print("1 - 10") # to know what to use here you can do one click and try to see how many pixels the dot covers
-                            # otherwise its just try and fail
+            print(
+                "1 - 10")  # to know what to use here you can do one click and try to see how many pixels the dot covers
+            # otherwise its just try and fail
             brus = input("Enter your desired brush size\n")
             brush.write(f"{brus}")
             brush.close()
@@ -705,7 +702,7 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
                     print("Saved...")
                     break
                 elif inp == "2":
-                    layers.write("314159") # could be sth else
+                    layers.write("314159")  # could be sth else
                     layers.close()
                     print("Saved...")
                     break
@@ -718,6 +715,7 @@ def calibrate(): # settings - I'm using text files to store them and there is pr
             break
         else:
             print("Enter a valid option !")
+
 
 # main stuff -----------------------------------------------------------------------------------------------------------
 
@@ -733,7 +731,7 @@ while True:
     palettedata.append(255)
 
     canvas = []
-    can = open("settings\canvas_settings.txt", "r") # other methods didnt work really especially for the palettedata
+    can = open("settings\canvas_settings.txt", "r")  # other methods didn't work really especially for the palettedata
     for posi in can:
         canvas.append(int(posi))
     offset_x = canvas[0]
@@ -745,8 +743,8 @@ while True:
     spe = open("settings\speed.txt", "r")
     for posi in spe:
         speed.append(int(posi))
-    cannyspeed = (1000 - speed[0]) / 10000
-    speeed = speed[0] # speed > 1000 for maximum speed
+    cannyspeed = (1000 - speed[0]) / 1000000
+    speeed = speed[0]  # speed > 1000 for maximum speed
 
     brush = []
     bru = open("settings\Brush.txt", "r")
@@ -774,7 +772,7 @@ while True:
                     if value == "b":
                         break
                     response = requests.get(f"{value}")
-                    image_bytes = io.BytesIO(response.content)  # gets the image from the url
+                    image_bytes = io.BytesIO(response.content)  # gets the image from the URL
                     image = Image.open(image_bytes).convert("RGBA")
                     cannyOption(image)
                     break
@@ -797,7 +795,7 @@ while True:
                             if value == "b":
                                 break
                             response = requests.get(f"{value}")
-                            image_bytes = io.BytesIO(response.content)  # gets the image from the url
+                            image_bytes = io.BytesIO(response.content)
                             image = Image.open(image_bytes).convert("RGBA")
                             ditheroption(image, palettedata, layers)
                             break
@@ -814,7 +812,7 @@ while True:
                             if value == "b":
                                 break
                             response = requests.get(f"{value}")
-                            image_bytes = io.BytesIO(response.content)  # gets the image from the url
+                            image_bytes = io.BytesIO(response.content)
                             image = Image.open(image_bytes).convert("RGBA")
                             ditheroptionblack(image)
                             break
@@ -836,7 +834,7 @@ while True:
                     if value == "b":
                         break
                     response = requests.get(f"{value}")
-                    image_bytes = io.BytesIO(response.content)  # gets the image from the url
+                    image_bytes = io.BytesIO(response.content)
                     image = Image.open(image_bytes).convert("RGBA")
                     quantizeOption(image, palettedata)
                     break
@@ -850,4 +848,4 @@ while True:
         else:
             print("Enter a valid option !")
 
-# yea thats it for now, maybe ill add some more stuff but till then have fun :)
+# yea that's it for now, maybe ill add some more stuff but till then have fun :)
