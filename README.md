@@ -24,7 +24,7 @@ I recommend using clipart images for faster drawing times
 Examples:
 
 ![redFanta1](https://user-images.githubusercontent.com/108233076/175929241-bef148d2-a90e-485b-8a31-4ef41c9a9749.gif)
-![redFanta](https://user-images.githubusercontent.com/108233076/175929254-18c14994-cae2-4bff-abbd-1a18c5ad907b.gif)
+![skribbl-Practise-by-get kolmus (1)](https://user-images.githubusercontent.com/108233076/178114225-b4f25b6d-184b-427f-82da-5dacb78b62c5.gif)
 ![goofy](https://user-images.githubusercontent.com/108233076/175929283-a5b94884-7071-4211-a84e-f5b2f5f4beb6.gif)
 ![skribbl-Practise-by-get kolmus](https://user-images.githubusercontent.com/108233076/178114034-246d8fd7-6e62-4751-8d0a-1335f292f1d4.gif)
 
