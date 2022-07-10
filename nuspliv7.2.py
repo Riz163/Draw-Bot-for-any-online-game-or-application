@@ -523,14 +523,14 @@ def quantizeOption(image, palettedata):
                                            int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                                            absolute=True, duration=0)
                                 if count > 4:
-                                    time.sleep(0.02)
+                                    time.sleep(int(10/speeed))
                                 break  # I don't know why this is needed 2 times, but it only worked like that...
                         except:
                             mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
                                        int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                                        absolute=True, duration=0)
                             if count > 4:
-                                time.sleep(0.02)  # you can change this if it leaves too many gaps or is too slow
+                                time.sleep(int(10/speeed))  # you can change this if it leaves too many gaps or is too slow
                             break
 
             mouse.release(button='left')
