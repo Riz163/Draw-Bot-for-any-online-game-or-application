@@ -71,16 +71,14 @@ def cannyOption(image):
         im = background
     im.convert('RGB')
     width, height = im.size
-    if width > canvas_x:
+    if width != canvas_x:
         height = int(height / width * canvas_x)
         width = canvas_x
 
-    if height > canvas_y:
+    if height != canvas_y:
         width = int(width / height * canvas_y)
         height = canvas_y
 
-    width = int(width)
-    height = int(height)
     im = im.resize((width, height))
     im.save("i.png")  # temporary save to work with the image in cv2
 
@@ -128,16 +126,26 @@ def ditheroption(image, palettedata, layers):
         im = background
     im.convert('RGB')
     width, height = im.size
-    if width > canvas_x:
-        height = int(height / width * canvas_x)
-        width = canvas_x
+    if width > canvas_x or height > canvas_y:
+        if width > canvas_x:
+            height = int(height / width * canvas_x)
+            width = canvas_x
 
-    if height > canvas_y:
-        width = int(width / height * canvas_y)
-        height = canvas_y
+        if height > canvas_y:
+            width = int(width / height * canvas_y)
+            height = canvas_y
 
-    width = int(width / pp)
-    height = int(height / pp)
+        width = int(width / pp)
+        height = int(height / pp)
+
+    if width < canvas_x:
+        height = int(height / width * canvas_x / pp)
+        width = int(canvas_x / pp)
+
+    if height < canvas_y:
+        width = int(width / height * canvas_y / pp)
+        height = int(canvas_y / pp)
+
     image_halfresized = im.resize((width, height))
     dummy = Image.new('P', (16, 16))  # creates an image to put the color palette on
     dummy.putpalette(palettedata)
@@ -339,16 +347,26 @@ def ditheroptionblack(image):
         im = background
     im.convert('RGB')
     width, height = im.size
-    if width > canvas_x:
-        height = int(height / width * canvas_x)
-        width = canvas_x
+    if width > canvas_x or height > canvas_y:
+        if width > canvas_x:
+            height = int(height / width * canvas_x)
+            width = canvas_x
 
-    if height > canvas_y:
-        width = int(width / height * canvas_y)
-        height = canvas_y
+        if height > canvas_y:
+            width = int(width / height * canvas_y)
+            height = canvas_y
 
-    width = int(width / pp)
-    height = int(height / pp)
+        width = int(width / pp)
+        height = int(height / pp)
+
+    if width < canvas_x:
+        height = int(height / width * canvas_x / pp)
+        width = int(canvas_x / pp)
+
+    if height < canvas_y:
+        width = int(width / height * canvas_y / pp)
+        height = int(canvas_y / pp)
+
     image_halfresized = im.resize((width, height))
 
     image_dithered = image_halfresized.convert('1')  # that's all you need for B/W dithering
@@ -409,16 +427,26 @@ def quantizeOption(image, palettedata):
         im = background
     im.convert('RGB')
     width, height = im.size
-    if width > canvas_x:
-        height = int(height / width * canvas_x)
-        width = canvas_x
+    if width > canvas_x or height > canvas_y:
+        if width > canvas_x:
+            height = int(height / width * canvas_x)
+            width = canvas_x
 
-    if height > canvas_y:
-        width = int(width / height * canvas_y)
-        height = canvas_y
+        if height > canvas_y:
+            width = int(width / height * canvas_y)
+            height = canvas_y
 
-    width = int(width / pp)
-    height = int(height / pp)
+        width = int(width / pp)
+        height = int(height / pp)
+
+    if width < canvas_x:
+        height = int(height / width * canvas_x / pp)
+        width = int(canvas_x / pp)
+
+    if height < canvas_y:
+        width = int(width / height * canvas_y / pp)
+        height = int(canvas_y / pp)
+
     image_halfresized = im.resize((width, height))
     dummy = Image.new('P', (16, 16))
     dummy.putpalette(palettedata)
