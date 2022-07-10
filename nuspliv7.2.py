@@ -274,7 +274,7 @@ def ditheroption(image, palettedata, layers):
                 print("Drawing interrupted")
                 break
             try:
-                if e > int(sth * 2 / 3):  # <-- the last number determines which colors should
+                if e > int(sth * 3 / 4):  # <-- the last number determines which colors should
                     layers = 2  # be split in 2 layers here for eg (1 - 2/3) = 1/3, so one third of the colors will be
                     c = 4  # drawn twice. the latest colors are the ones with the most pixels because they get sorted
                     drawFS1(b, c, layers)  # you can experiment with that number...
@@ -517,7 +517,6 @@ def quantizeOption(image, palettedata):
             count = 2
             if c < len(pixels[b]) - 2:  # I drag the mouse along all connected pixels to make it faster
                 if pixels[b][c] + 1 == pixels[b][c + 2]:
-
                     while True:
                         if keyboard.is_pressed('q'):  # Failsafe
                             break
@@ -528,14 +527,14 @@ def quantizeOption(image, palettedata):
                                 mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
                                            int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                                            absolute=True, duration=0)
-                                if count > 4:
+                                if count >= 4:
                                     time.sleep(0.05)
                                 break  # I don't know why this is needed 2 times, but it only worked like that...
                         except:
                             mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
                                        int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                                        absolute=True, duration=0)
-                            if count > 4:
+                            if count >= 4:
                                 time.sleep(0.05)  # you can change this if it leaves too many gaps or is too slow
                             break
 
