@@ -72,12 +72,13 @@ def cannyOption(image):
     im.convert('RGB')
     width, height = im.size
 
-    height = int(height / width * canvas_x)
-    width = canvas_x
+    if width != canvas_x:
+        height = int(height / width * canvas_x)
+        width = canvas_x
 
-
-    width = int(width / height * canvas_y)
-    height = canvas_y
+    if height != canvas_y:
+        width = int(width / height * canvas_y)
+        height = canvas_y
 
     im = im.resize((width, height))
     im.save("i.png")  # temporary save to work with the image in cv2
@@ -127,11 +128,13 @@ def ditheroption(image, palettedata, layers):
     im.convert('RGB')
     width, height = im.size
 
-    height = int(height / width * canvas_x / pp)
-    width = int(canvas_x / pp)
+    if width > int(canvas_x / pp):
+        height = int(height / width * canvas_x / pp)
+        width = int(canvas_x / pp)
 
-    width = int(width / height * canvas_y / pp)
-    height = int(canvas_y / pp)
+    if height > int(canvas_y / pp):
+        width = int(width / height * canvas_y / pp)
+        height = int(canvas_y / pp)
 
     image_halfresized = im.resize((width, height))
     dummy = Image.new('P', (16, 16))  # creates an image to put the color palette on
@@ -335,12 +338,13 @@ def ditheroptionblack(image):
     im.convert('RGB')
     width, height = im.size
 
-    height = int(height / width * canvas_x / pp)
-    width = int(canvas_x / pp)
+    if width > int(canvas_x / pp):
+        height = int(height / width * canvas_x / pp)
+        width = int(canvas_x / pp)
 
-
-    width = int(width / height * canvas_y / pp)
-    height = int(canvas_y / pp)
+    if height > int(canvas_y / pp):
+        width = int(width / height * canvas_y / pp)
+        height = int(canvas_y / pp)
 
     image_halfresized = im.resize((width, height))
 
@@ -402,11 +406,13 @@ def quantizeOption(image, palettedata):
     im.convert('RGB')
     width, height = im.size
 
-    height = int(height / width * canvas_x / pp)
-    width = int(canvas_x / pp)
+    if width > int(canvas_x / pp):
+        height = int(height / width * canvas_x / pp)
+        width = int(canvas_x / pp)
 
-    width = int(width / height * canvas_y / pp)
-    height = int(canvas_y / pp)
+    if height > int(canvas_y / pp):
+        width = int(width / height * canvas_y / pp)
+        height = int(canvas_y / pp)
 
     image_halfresized = im.resize((width, height))
     dummy = Image.new('P', (16, 16))
