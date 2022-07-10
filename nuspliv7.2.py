@@ -126,23 +126,12 @@ def ditheroption(image, palettedata, layers):
         im = background
     im.convert('RGB')
     width, height = im.size
-    if width > canvas_x or height > canvas_y:
-        if width > canvas_x:
-            height = int(height / width * canvas_x)
-            width = canvas_x
 
-        if height > canvas_y:
-            width = int(width / height * canvas_y)
-            height = canvas_y
-
-        width = int(width / pp)
-        height = int(height / pp)
-
-    if width < canvas_x:
+    if width != canvas_x:
         height = int(height / width * canvas_x / pp)
         width = int(canvas_x / pp)
 
-    if height < canvas_y:
+    if height != canvas_y:
         width = int(width / height * canvas_y / pp)
         height = int(canvas_y / pp)
 
@@ -347,23 +336,12 @@ def ditheroptionblack(image):
         im = background
     im.convert('RGB')
     width, height = im.size
-    if width > canvas_x or height > canvas_y:
-        if width > canvas_x:
-            height = int(height / width * canvas_x)
-            width = canvas_x
 
-        if height > canvas_y:
-            width = int(width / height * canvas_y)
-            height = canvas_y
-
-        width = int(width / pp)
-        height = int(height / pp)
-
-    if width < canvas_x:
+    if width != canvas_x:
         height = int(height / width * canvas_x / pp)
         width = int(canvas_x / pp)
 
-    if height < canvas_y:
+    if height != canvas_y:
         width = int(width / height * canvas_y / pp)
         height = int(canvas_y / pp)
 
@@ -414,7 +392,6 @@ def ditheroptionblack(image):
             print("")
             break
 
-
 def quantizeOption(image, palettedata):
     print("Processing image...")
     layers = 1  # no layers here im lazy and isnt worth it
@@ -427,23 +404,12 @@ def quantizeOption(image, palettedata):
         im = background
     im.convert('RGB')
     width, height = im.size
-    if width > canvas_x or height > canvas_y:
-        if width > canvas_x:
-            height = int(height / width * canvas_x)
-            width = canvas_x
 
-        if height > canvas_y:
-            width = int(width / height * canvas_y)
-            height = canvas_y
-
-        width = int(width / pp)
-        height = int(height / pp)
-
-    if width < canvas_x:
+    if width != int(canvas_x / pp):
         height = int(height / width * canvas_x / pp)
         width = int(canvas_x / pp)
 
-    if height < canvas_y:
+    if height != int(canvas_y / pp):
         width = int(width / height * canvas_y / pp)
         height = int(canvas_y / pp)
 
@@ -561,19 +527,15 @@ def quantizeOption(image, palettedata):
                                 mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
                                            int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                                            absolute=True, duration=0)
-                                if count <= 4:
-                                    time.sleep(int(1/speeed))
-                                else:
-                                    time.sleep(0.05)
+                                if count > 4:
+                                    time.sleep(0.02)
                                 break  # I don't know why this is needed 2 times, but it only worked like that...
                         except:
                             mouse.move(int(pixels[b][c + count] * pp + offset_x + int((canvas_x - width * pp) / 2)),
                                        int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                                        absolute=True, duration=0)
-                            if count <= 4:
-                                time.sleep(int(1 / speeed))
-                            else:
-                                time.sleep(0.05)  # you can change this if it leaves too many gaps or is too slow
+                            if count > 4:
+                                time.sleep(0.02)  # you can change this if it leaves too many gaps or is too slow
                             break
 
             mouse.release(button='left')
@@ -581,7 +543,7 @@ def quantizeOption(image, palettedata):
             c += count
 
             if c >= cc:  # and also delete this if it's too slow
-                time.sleep(0.05)
+                time.sleep(int(1/speeed))
                 cc += speeed
 
     def drawQuantize2():
