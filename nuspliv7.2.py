@@ -547,7 +547,7 @@ def quantizeOption(image, palettedata):
                        int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
                        absolute=True, duration=0)
             mouse.press(button='left')  # here I am holding down the mouse button, instead of clicking on every pixel
-            count = 0
+            count = 2
             if c < len(pixels[b]) - 2:  # I drag the mouse along all connected pixels to make it faster
                 if pixels[b][c] + 1 == pixels[b][c + 2]:
 
@@ -578,7 +578,7 @@ def quantizeOption(image, palettedata):
 
             mouse.release(button='left')
 
-            c += 2 + count
+            c += count
 
             if c >= cc:  # and also delete this if it's too slow
                 time.sleep(0.05)
