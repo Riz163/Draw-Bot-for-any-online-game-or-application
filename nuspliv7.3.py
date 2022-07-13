@@ -72,11 +72,6 @@ def cannyOption(image):
     im.convert('RGB')
     width, height = im.size
 
-    print(width)
-    print(height)
-    print(canvas_x)
-    print(canvas_y)
-
     if height > width:
         if width != canvas_x:
             height = int(height / width * canvas_x)
@@ -113,9 +108,6 @@ def cannyOption(image):
             if height != canvas_y:
                 width = int(width / height * canvas_y)
                 height = canvas_y
-
-    print(width)
-    print(height)
 
     im = im.resize((width, height))
     im.save("i.png")  # temporary save to work with the image in cv2
