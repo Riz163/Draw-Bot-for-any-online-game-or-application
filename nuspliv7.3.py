@@ -72,20 +72,57 @@ def cannyOption(image):
     im.convert('RGB')
     width, height = im.size
 
-    if width != canvas_x:
-        height = int(height / width * canvas_x)
-        width = canvas_x
+    print(width)
+    print(height)
+    print(canvas_x)
+    print(canvas_y)
 
-    if height != canvas_y:
-        width = int(width / height * canvas_y)
-        height = canvas_y
+    if height > width:
+        if width != canvas_x:
+            height = int(height / width * canvas_x)
+            width = canvas_x
+
+        if height != canvas_y:
+            width = int(width / height * canvas_y)
+            height = canvas_y
+
+    elif width > height:
+        if height != canvas_y:
+            width = int(width / height * canvas_y)
+            height = canvas_y
+
+        if width != canvas_x:
+            height = int(height / width * canvas_x)
+            width = canvas_x
+    # what is this resizing algorithm? No idea, but there were always some special cases where previous versions
+    # wouldn't work ...
+    else:
+        if canvas_x < canvas_y:
+            if height != canvas_y:
+                width = int(width / height * canvas_y)
+                height = canvas_y
+
+            if width != canvas_x:
+                height = int(height / width * canvas_x)
+                width = canvas_x
+        else:
+            if width != canvas_x:
+                height = int(height / width * canvas_x)
+                width = canvas_x
+
+            if height != canvas_y:
+                width = int(width / height * canvas_y)
+                height = canvas_y
+
+    print(width)
+    print(height)
 
     im = im.resize((width, height))
     im.save("i.png")  # temporary save to work with the image in cv2
 
     outdata = []
     img = cv2.imread("i.png")
-    os.remove("i.png")  # deleting it
+    os.remove("i.png")  # deleting itt
 
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # grayscales the image to work better with the
     edges = cv2.Canny(gray, 75, 150)  # canny edge detection algorithm
@@ -231,7 +268,6 @@ def ditheroption(image, palettedata, layers):
         pyautogui.click()
         while c < len(pixels[b]):
             if keyboard.is_pressed('q'):
-                print("Drawing interrupted")
                 break
             mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - width * pp) / 2)),  # similar to canny option
                        int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),  # but upscaling
@@ -506,7 +542,6 @@ def quantizeOption(image, palettedata):
         while c < len(pixels[b]):
 
             if keyboard.is_pressed('q'):  # Failsafe
-                print("Drawing interrupted")
                 break
             mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - width * pp) / 2)),
                        int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
@@ -624,10 +659,17 @@ def quantizeOptionlines(image, palettedata):
     def drawQuantLines():
         for j in range(y):
             i = 0
-            time.sleep(1000 - speeed)
+            time.sleep(int((1000 - speeed) / 500))
+            if keyboard.is_pressed('q'):  # Failsafe
+                print("Drawing interrupted")
+                break
+
             while i < x:  # for every pixel
                 a = 0
                 f = 0
+                if keyboard.is_pressed('q'):  # Failsafe
+                    break
+
                 while a < len(palettedata) - 3:
                     if keyboard.is_pressed('q'):  # Failsafe
                         break
@@ -639,12 +681,9 @@ def quantizeOptionlines(image, palettedata):
                     if (r, g, b) == (255, 255, 255):
                         break
                     elif (r, g, b) == (red, green, blue):  # search for the color
-                        if keyboard.is_pressed('q'):  # Failsafe
-                            break
 
                         mouse.move(coordinates[f], coordinates[f+1], absolute=True, duration=0)
                         mouse.click(button='left')
-                        time.sleep(1000 - speeed)
 
                         mouse.move(int(i * pp + offset_x + int((canvas_x - width * pp) / 2)),
                                    int(j * pp + offset_y + int((canvas_y - height * pp) / 2)),
@@ -661,12 +700,18 @@ def quantizeOptionlines(image, palettedata):
                                 break
 
                         if i - ii >= 4:
+                            if keyboard.is_pressed('q'):  # Failsafe
+                                break
+
                             mouse.move(int(i * pp + offset_x + int((canvas_x - width * pp) / 2)),
                                        int(j * pp + offset_y + int((canvas_y - height * pp) / 2)),
                                        absolute=True, duration=0)
                             time.sleep(0.025)
                             mouse.release(button='left')
                         else:
+                            if keyboard.is_pressed('q'):  # Failsafe
+                                break
+
                             mouse.release(button='left')
                             while ii <= i:
                                 mouse.move(int(ii * pp + offset_x + int((canvas_x - width * pp) / 2)),
