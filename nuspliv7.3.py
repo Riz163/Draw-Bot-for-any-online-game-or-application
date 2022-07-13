@@ -651,7 +651,7 @@ def quantizeOptionlines(image, palettedata):
     def drawQuantLines():
         for j in range(y):
             i = 0
-            time.sleep(int((1000 - speeed) / 500))
+            time.sleep((1000 - speeed) / 500)
             if keyboard.is_pressed('q'):  # Failsafe
                 print("Drawing interrupted")
                 break
