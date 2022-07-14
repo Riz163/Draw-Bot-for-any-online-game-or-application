@@ -413,19 +413,11 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
-                    if width < int(canvas_x/pp) and height < int(canvas_y/pp):
-                        if width > height:
+                    if width != canvas_x or height != canvas_y:
+                        if canvas_x < canvas_y:
                             height = int(height / width * canvas_x/pp)
                             width = int(canvas_x/pp)
                         else:
-                            width = int(width / height * canvas_y/pp)
-                            height = int(canvas_y/pp)
-                    else:
-                        if width > int(canvas_x/pp):
-                            height = int(height / width * canvas_x/pp)
-                            width = int(canvas_x/pp)
-
-                        if height > canvas_y:
                             width = int(width / height * canvas_y/pp)
                             height = int(canvas_y/pp)
 
@@ -640,19 +632,11 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
-                    if width < int(canvas_x / pp) and height < int(canvas_y / pp):
-                        if width > height:
+                    if width != canvas_x or height != canvas_y:
+                        if canvas_x < canvas_y:
                             height = int(height / width * canvas_x / pp)
                             width = int(canvas_x / pp)
                         else:
-                            width = int(width / height * canvas_y / pp)
-                            height = int(canvas_y / pp)
-                    else:
-                        if width > int(canvas_x / pp):
-                            height = int(height / width * canvas_x / pp)
-                            width = int(canvas_x / pp)
-
-                        if height > canvas_y:
                             width = int(width / height * canvas_y / pp)
                             height = int(canvas_y / pp)
 
@@ -721,19 +705,11 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
-                    if width < int(canvas_x / pp) and height < int(canvas_y / pp):
-                        if width > height:
+                    if width != canvas_x or height != canvas_y:
+                        if canvas_x < canvas_y:
                             height = int(height / width * canvas_x / pp)
                             width = int(canvas_x / pp)
                         else:
-                            width = int(width / height * canvas_y / pp)
-                            height = int(canvas_y / pp)
-                    else:
-                        if width > int(canvas_x / pp):
-                            height = int(height / width * canvas_x / pp)
-                            width = int(canvas_x / pp)
-
-                        if height > canvas_y:
                             width = int(width / height * canvas_y / pp)
                             height = int(canvas_y / pp)
 
@@ -934,19 +910,11 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
-                    if width < int(canvas_x / pp) and height < int(canvas_y / pp):
-                        if width > height:
+                    if width != canvas_x or height != canvas_y:
+                        if canvas_x < canvas_y:
                             height = int(height / width * canvas_x / pp)
                             width = int(canvas_x / pp)
                         else:
-                            width = int(width / height * canvas_y / pp)
-                            height = int(canvas_y / pp)
-                    else:
-                        if width > int(canvas_x / pp):
-                            height = int(height / width * canvas_x / pp)
-                            width = int(canvas_x / pp)
-
-                        if height > canvas_y:
                             width = int(width / height * canvas_y / pp)
                             height = int(canvas_y / pp)
 
