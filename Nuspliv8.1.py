@@ -641,13 +641,21 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
-                    if width != canvas_x or height != canvas_y:
-                        if width < height:
-                            height = int(height / width * canvas_x / pp)
-                            width = int(canvas_x / pp)
+                    if width != int(canvas_x / pp) or height != int(canvas_y / pp):
+                        if width < int(canvas_x / pp) and height < int(canvas_x / pp):
+                            if width < height:
+                                height = int(height / width * canvas_x / pp)
+                                width = int(canvas_x / pp)
+                            else:
+                                width = int(width / height * canvas_y / pp)
+                                height = int(canvas_y / pp)
                         else:
-                            width = int(width / height * canvas_y / pp)
-                            height = int(canvas_y / pp)
+                            if width > height:
+                                height = int(height / width * canvas_x / pp)
+                                width = int(canvas_x / pp)
+                            else:
+                                width = int(width / height * canvas_y / pp)
+                                height = int(canvas_y / pp)
 
                     image_halfresized = im.resize((width, height))
 
