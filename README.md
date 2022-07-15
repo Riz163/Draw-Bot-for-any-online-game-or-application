@@ -25,7 +25,8 @@ and once you get used to it, it's also very easy to use
 I also recommend using clipart images for faster drawing times (not necessary for dithering)
 
 YT demo:
-https://www.youtube.com/watch?v=s9wIJb-HGWI
+https://www.youtube.com/watch?v=s9wIJb-HGWI (Part 1)\
+https://www.youtube.com/watch?v=oVohdpzmmhU (Part 2)
 
 Examples:
 
