@@ -347,21 +347,18 @@ class Ui_MainWindow(object):
                     width, height = im.size
 
                     # resizing image to always be the size of the canvas without changing the ratio
+                    if canvas_x > canvas_y:
+                        smaller = canvas_y
+                    else:
+                        smaller = canvas_x
+
                     if width != canvas_x or height != canvas_y:
-                        if width < canvas_x and height < canvas_y:
-                            if width < height:
-                                height = int(height / width * canvas_x)
-                                width = canvas_x
-                            else:
-                                width = int(width / height * canvas_y)
-                                height = canvas_y
+                        if width > height:
+                            height = int(height / width * smaller)
+                            width = smaller
                         else:
-                            if width > height:
-                                height = int(height / width * canvas_x)
-                                width = canvas_x
-                            else:
-                                width = int(width / height * canvas_y)
-                                height = canvas_y
+                            width = int(width / height * smaller)
+                            height = smaller
 
                     im = im.resize((width, height))
                     im.save("i.png")  # temporary save to work with the image in cv2
@@ -413,21 +410,19 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
-                    if width != int(canvas_x/pp) or height != int(canvas_y/pp):
-                        if width < int(canvas_x/pp) and height < int(canvas_x/pp):
-                            if width < height:
-                                height = int(height / width * canvas_x/pp)
-                                width = int(canvas_x/pp)
-                            else:
-                                width = int(width / height * canvas_y/pp)
-                                height = int(canvas_y/pp)
+                    if canvas_x > canvas_y:
+                        smaller = canvas_y
+                    else:
+                        smaller = canvas_x
+
+                    if width != int(canvas_x / pp) or height != int(canvas_y / pp):
+                        if width > height:
+                            height = int(height / width * smaller / pp)
+                            width = int(smaller / pp)
                         else:
-                            if width > height:
-                                height = int(height / width * canvas_x / pp)
-                                width = int(canvas_x / pp)
-                            else:
-                                width = int(width / height * canvas_y / pp)
-                                height = int(canvas_y / pp)
+                            width = int(width / height * smaller / pp)
+                            height = int(smaller / pp)
+
 
                     image_halfresized = im.resize((width, height))
                     dummy = Image.new('P', (16, 16))  # creates an image to put the color palette on
@@ -640,21 +635,18 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
+                    if canvas_x > canvas_y:
+                        smaller = canvas_y
+                    else:
+                        smaller = canvas_x
+
                     if width != int(canvas_x / pp) or height != int(canvas_y / pp):
-                        if width < int(canvas_x / pp) and height < int(canvas_x / pp):
-                            if width < height:
-                                height = int(height / width * canvas_x / pp)
-                                width = int(canvas_x / pp)
-                            else:
-                                width = int(width / height * canvas_y / pp)
-                                height = int(canvas_y / pp)
+                        if width > height:
+                            height = int(height / width * smaller / pp)
+                            width = int(smaller / pp)
                         else:
-                            if width > height:
-                                height = int(height / width * canvas_x / pp)
-                                width = int(canvas_x / pp)
-                            else:
-                                width = int(width / height * canvas_y / pp)
-                                height = int(canvas_y / pp)
+                            width = int(width / height * smaller / pp)
+                            height = int(smaller / pp)
 
                     image_halfresized = im.resize((width, height))
 
@@ -721,21 +713,18 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
+                    if canvas_x > canvas_y:
+                        smaller = canvas_y
+                    else:
+                        smaller = canvas_x
+
                     if width != int(canvas_x / pp) or height != int(canvas_y / pp):
-                        if width < int(canvas_x / pp) and height < int(canvas_x / pp):
-                            if width < height:
-                                height = int(height / width * canvas_x / pp)
-                                width = int(canvas_x / pp)
-                            else:
-                                width = int(width / height * canvas_y / pp)
-                                height = int(canvas_y / pp)
+                        if width > height:
+                            height = int(height / width * smaller / pp)
+                            width = int(smaller / pp)
                         else:
-                            if width > height:
-                                height = int(height / width * canvas_x / pp)
-                                width = int(canvas_x / pp)
-                            else:
-                                width = int(width / height * canvas_y / pp)
-                                height = int(canvas_y / pp)
+                            width = int(width / height * smaller / pp)
+                            height = int(smaller / pp)
 
                     image_halfresized = im.resize((width, height))
                     dummy = Image.new('P', (16, 16))
@@ -934,21 +923,18 @@ class Ui_MainWindow(object):
                     im.convert('RGB')
                     width, height = im.size
 
+                    if canvas_x > canvas_y:
+                        smaller = canvas_y
+                    else:
+                        smaller = canvas_x
+
                     if width != int(canvas_x / pp) or height != int(canvas_y / pp):
-                        if width < int(canvas_x / pp) and height < int(canvas_x / pp):
-                            if width < height:
-                                height = int(height / width * canvas_x / pp)
-                                width = int(canvas_x / pp)
-                            else:
-                                width = int(width / height * canvas_y / pp)
-                                height = int(canvas_y / pp)
+                        if width > height:
+                            height = int(height / width * smaller / pp)
+                            width = int(smaller / pp)
                         else:
-                            if width > height:
-                                height = int(height / width * canvas_x / pp)
-                                width = int(canvas_x / pp)
-                            else:
-                                width = int(width / height * canvas_y / pp)
-                                height = int(canvas_y / pp)
+                            width = int(width / height * smaller / pp)
+                            height = int(smaller / pp)
 
                     image_halfresized = im.resize((width, height))
                     dummy = Image.new('P', (16, 16))
