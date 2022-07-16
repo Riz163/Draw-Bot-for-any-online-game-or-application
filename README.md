@@ -15,12 +15,11 @@ features:
 * settings for colors, brushsize, speed and drawing area
 * uses image URL
 
-run it via cmd or in your python ide and it should install all the requirements on its own\
-make sure to calibrate it before drawing by selecting settings (first 2 are most important)\
+run by double clicking on the Nuspli file and it should install all the requirements on its own\
+make sure to calibrate it before drawing by pressing Calibrate\
 if any emergencies occour, press "q" to trigger the failsafe
 
-not the prettiest, but I belive the believe the fastest and most versitile one out there
-and once you get used to it, it's also very easy to use
+I belive this is the fastest and most versitile one out there and it's also very easy to use
 
 I also recommend using clipart images for faster drawing times (not necessary for dithering)
 
