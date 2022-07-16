@@ -22,6 +22,7 @@ while True:
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        MainWindow.setWindowFlags(MainWindow.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
         MainWindow.setObjectName("Nuspliv8.1")
         MainWindow.resize(379, 393)
         MainWindow.setMinimumSize(QtCore.QSize(379, 393))
@@ -1067,7 +1068,6 @@ class Ui_MainWindow(object):
         keyboard.send('enter')
 
 if __name__ == "__main__":
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
