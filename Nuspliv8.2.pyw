@@ -993,7 +993,6 @@ class Ui_MainWindow(object):
                     def drawQuantLines():
                         for j in range(y):
                             i = 0
-                            time.sleep((1000 - speeed) / 500)
                             if keyboard.is_pressed('q'):  # Failsafe
                                 self.cmdLabel.setText("Drawing interrupted")
                                 time.sleep(1)
@@ -1041,7 +1040,7 @@ class Ui_MainWindow(object):
                                             mouse.move(int(i * pp + offset_x + int((canvas_x - width * pp) / 2)),
                                                        int(j * pp + offset_y + int((canvas_y - height * pp) / 2)),
                                                        absolute=True, duration=0)
-                                            time.sleep(0.025)
+                                            time.sleep((1000 - speeed) / 500)
                                             mouse.release(button='left')
                                         else:
                                             if keyboard.is_pressed('q'):  # Failsafe
