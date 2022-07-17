@@ -431,7 +431,7 @@ class Ui_MainWindow(object):
                             width = int(width / height * canvas_y / pp)
                             height = int(canvas_y / pp)
 
-                        if width > canvas_x or height > canvas_y:
+                        if width > (canvas_x / pp) or height > (canvas_y / pp):
                             if width >= height:
                                 height = int(height / width * smaller / pp)
                                 width = int(smaller / pp)
@@ -663,7 +663,7 @@ class Ui_MainWindow(object):
                             width = int(width / height * canvas_y / pp)
                             height = int(canvas_y / pp)
 
-                        if width > canvas_x or height > canvas_y:
+                        if width > (canvas_x / pp) or height > (canvas_y / pp):
                             if width >= height:
                                 height = int(height / width * smaller / pp)
                                 width = int(smaller / pp)
@@ -749,7 +749,7 @@ class Ui_MainWindow(object):
                             width = int(width / height * canvas_y / pp)
                             height = int(canvas_y / pp)
 
-                        if width > canvas_x or height > canvas_y:
+                        if width > (canvas_x / pp) or height > (canvas_y / pp):
                             if width >= height:
                                 height = int(height / width * smaller / pp)
                                 width = int(smaller / pp)
@@ -967,7 +967,7 @@ class Ui_MainWindow(object):
                             width = int(width / height * canvas_y / pp)
                             height = int(canvas_y / pp)
 
-                        if width > canvas_x or height > canvas_y:
+                        if width > (canvas_x / pp) or height > (canvas_y / pp):
                             if width >= height:
                                 height = int(height / width * smaller / pp)
                                 width = int(smaller / pp)
