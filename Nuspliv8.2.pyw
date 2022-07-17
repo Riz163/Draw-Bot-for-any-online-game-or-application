@@ -21,7 +21,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setWindowIcon(QtGui.QIcon('logo.png'))
         MainWindow.setWindowFlags(MainWindow.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
-        MainWindow.setObjectName("Nuspliv8.1")
+        MainWindow.setObjectName("Nuspliv8.2")
         MainWindow.resize(379, 393)
         MainWindow.setMinimumSize(QtCore.QSize(379, 393))
         MainWindow.setMaximumSize(QtCore.QSize(379, 393))
@@ -227,7 +227,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Nuspliv8.1"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Nuspliv8.2"))
         self.DrawmodeLabel.setText(_translate("MainWindow", "Drawing Mode:"))
         self.DrawmodeBox.setItemText(0, _translate("MainWindow", "Canny - Outlines"))
         self.DrawmodeBox.setItemText(1, _translate("MainWindow", "Floyd-Steinberg-Dithering - Colored"))
