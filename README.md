@@ -15,7 +15,8 @@ features:
 * settings for colors, brushsize, speed and drawing area
 * uses image URL
 
-run by double clicking on the Nuspli file and it should install all the requirements on its own\
+run it by simply double clicking the Nuspli file and on first run it should install all the requirements on its own\
+a few cmd windows will pop up, just give it some time to install everything. (make sure to upgrade pip if it stays in a loop)\
 make sure to calibrate it before drawing by pressing Calibrate\
 if any emergencies occour, press "q" to trigger the failsafe
 
