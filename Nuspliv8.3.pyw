@@ -5,7 +5,6 @@ while True:
         import pynput.mouse as ms
         from PIL import Image
         from pynput.mouse import Button
-        from turtle import mode, Terminator
         from PyQt5 import QtCore, QtGui, QtWidgets
         break
 
