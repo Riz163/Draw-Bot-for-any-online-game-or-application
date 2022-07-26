@@ -1,11 +1,11 @@
 while True:
     try:
-        import os, sys, time, io  # Base modules
+        import os, sys, time, io, subprocess  # Base modules
         import ait, cv2, numpy, pyautogui, requests, keyboard, mouse, pyscreeze  # Dependencies
         import pynput.mouse as ms
         from PIL import Image
         from pynput.mouse import Button
-        from PyQt5 import QtCore, QtGui, QtWidgets
+        from PyQt5 import QtCore, QtGui, QtWidgets, Qt
         break
 
     except ImportError:
@@ -16,10 +16,12 @@ while True:
         for i in dep:
             os.system(f"cmd /c pip install {i}")
 
-class Ui_MainWindow(object):
+class Ui_MainWindow(object):  # setting up the window
+
     def setupUi(self, MainWindow):
-        MainWindow.setWindowIcon(QtGui.QIcon('logo.png'))
-        MainWindow.setWindowFlags(MainWindow.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)
+
+        MainWindow.setWindowIcon(QtGui.QIcon('logo.png'))  # logo
+        MainWindow.setWindowFlags(MainWindow.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)  # make it always stay on top
         MainWindow.setObjectName("Nuspliv8.3")
         MainWindow.resize(379, 393)
         MainWindow.setMinimumSize(QtCore.QSize(379, 393))
@@ -27,6 +29,7 @@ class Ui_MainWindow(object):
         MainWindow.setMouseTracking(False)
         MainWindow.setAcceptDrops(True)
         MainWindow.setAutoFillBackground(False)
+        #  now all the widgets
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.DrawmodeLabel = QtWidgets.QLabel(self.centralwidget)
@@ -216,10 +219,11 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-
+        #  connecting the buttons to functions
         self.DrawButton.clicked.connect(self.pressedDraw)
         self.CalibrateCanvasButton.clicked.connect(self.pressedCalCanvas)
         self.CalibrateColorsButton.clicked.connect(self.pressedCalColors)
+
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -250,15 +254,142 @@ class Ui_MainWindow(object):
         self.DrawButton.setText(_translate("MainWindow", "Draw"))
         self.QuitDrawLabel.setText(_translate("MainWindow", "(Press q to quit)"))
 
-    def pressedDraw(self):
+
+    def pressedDraw(self):  # when draw button is pressed
+        #  some functions for later -----------------------------------------------------------------------------------
+        def getImage():
+            url = self.URLLineEdit.text()
+            self.cmdLabel.setText("Processing image...")
+            response = requests.get(f"{url}")
+            image_bytes = io.BytesIO(response.content)  # gets the image from the URL
+            image = Image.open(image_bytes).convert("RGBA")
+            return image
+
+        def ProcessingError():
+            self.cmdLabel.setText("Failed Processing...\nEnter a valid url (and) or choose another image")
+
+        def preProcess(image, pp):
+            im = image
+            fill_color = (255, 255, 255)  # white
+            if im.mode in ('RGBA', 'LA'):
+                background = Image.new(im.mode[:-1], im.size, fill_color)  # puts a white background
+                background.paste(im, im.split()[-1])  # on png images aswell
+                im = background
+            im.convert('RGB')
+            width, height = im.size
+
+            # resizing image to always be the size of the canvas without changing the ratio
+            if canvas_x > canvas_y:
+                smaller = canvas_y
+            else:
+                smaller = canvas_x
+
+            if width != int(canvas_x / pp) or height != int(canvas_y / pp):
+                if width > height:
+                    height = int(height / width * canvas_x / pp)
+                    width = int(canvas_x / pp)
+                else:
+                    width = int(width / height * canvas_y / pp)
+                    height = int(canvas_y / pp)
+
+                if width > (canvas_x / pp) or height > (canvas_y / pp):
+                    if width >= height:
+                        height = int(height / width * smaller / pp)
+                        width = int(smaller / pp)
+                    else:
+                        width = int(width / height * smaller / pp)
+                        height = int(smaller / pp)
+
+            im = im.resize((width, height))
+
+            preProcess.width = width
+            preProcess.height = height
+            return im
+
+        def initPixels():
+            pixels = []
+            for n in range(int((len(palettedata) - 3) / 3)):
+                pixels.append([])
+            return pixels
+
+        def initCoords(pixels):
+            coordinates = []
+            coords = open("settings\colors_coordinates.txt", "r")  # reads the coords for the color selections
+            for cor in coords:
+                coordinates.append(int(cor))
+            w = 0
+            t = 0
+            while w < len(coordinates):
+                pixels[t].append(coordinates[w])  # and adds them to the pixel list for the right color
+                pixels[t].append(coordinates[w + 1])
+                t += 1
+                w += 2
+
+        def getPixels(image, pixels):
+            x, y = image.size
+
+            def getcoords():  # gets the coords of the pixels that have the same rgb values as the color
+
+                color = [palettedata[a], palettedata[a + 1], palettedata[a + 2]]
+                red = color[0]
+                green = color[1]
+                blue = color[2]
+
+                for j in range(y):
+                    for i in range(x):
+                        r, g, b = image.getpixel((i, j))
+                        if (r, g, b) == (red, green, blue):
+                            pixels[v].append(i)
+                            pixels[v].append(j)
+
+            length = len(
+                palettedata) - 3  # -3 for white because white is the background color
+            a = 0  # (if not simply do click on white while calibrating)
+            v = 0
+            while a < length:
+                getcoords()
+                a += 3
+                v += 1
+
+        def finalize(pixels):
+            pixels.sort(
+                key=len)  # here its sorts all color entries in pixels by their length to draw the ones with fewer colors first
+            # as they are likely to be the outlines so that it's easier to recognize the drawing fast
+
+            sth = 0
+            for ol in pixels:  # getting colors that are actually going to be used
+                if len(ol) > 2:
+                    sth += 1
+            finalize.sth = sth
+            self.cmdLabel.setText(f"Drawing... {sth} colors are being used")
+            self.cmdLabel.repaint()
+
+        def clickonblack():
+            Black = []
+            coordis = []
+            coords = open("settings\colors_coordinates.txt", "r")  # reads the coords for the color selections
+            for cor in coords:
+                coordis.append(int(cor))
+            w = 0
+            t = 0
+            while w < len(coordis):
+                if (palettedata[t], palettedata[t + 1], palettedata[t + 2]) == (0, 0, 0):
+                    Black.append(coordis[w])  # and adds them to the pixel list for the right color
+                    Black.append(coordis[w + 1])
+                    break
+                w += 2
+                t += 3
+            pyautogui.moveTo(Black[0], Black[1])  # click on black
+            pyautogui.click()
+        #  ------------------------------------------------------------------------------------------------------------
         while True:
-            # first update settings
+            # first of all, update the settings
             try:
                 palettedata = []
                 palette = open("settings\colors_palette.txt", "r")
                 for color in palette:
                     palettedata.append(int(color))
-                palettedata.append(255)  # adds white for dithering but not for drawing
+                palettedata.append(255)  # adds white for dithering (but not for drawing)
                 palettedata.append(255)
                 palettedata.append(255)
 
@@ -297,6 +428,7 @@ class Ui_MainWindow(object):
                 self.cmdLabel.setText("Enter a valid number of layers !")
                 break
 
+            # Canny mode -----------------------------------------------------------------------------------------------
             if (self.DrawmodeBox.currentText()) == "Canny - Outlines":
 
                 mou = ms.Controller()
@@ -309,6 +441,7 @@ class Ui_MainWindow(object):
                     return int(temp[select])
 
                 def drawCanny(pointArr):
+                    clickonblack()
                     mou.position = (
                     getXandY(pointArr[0], 0), getXandY(pointArr[0], 1))  # First entry is the start position
                     ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
@@ -335,40 +468,8 @@ class Ui_MainWindow(object):
                     mou.release(Button.left)
 
                 def cannyOption(image):
-
-                    im = image
-                    fill_color = (255, 255, 255)  # white
-                    if im.mode in ('RGBA', 'LA'):
-                        background = Image.new(im.mode[:-1], im.size, fill_color)  # puts a white background
-                        background.paste(im, im.split()[-1])  # on png images aswell
-                        im = background
-                    im.convert('RGB')
-                    width, height = im.size
-
-                    # resizing image to always be the size of the canvas without changing the ratio
-                    if canvas_x > canvas_y:
-                        smaller = canvas_y
-                    else:
-                        smaller = canvas_x
-
-                    if width != canvas_x or height != canvas_y:
-                        if width >= height:
-                            height = int(height / width * canvas_x)
-                            width = canvas_x
-                        else:
-                            width = int(width / height * canvas_y)
-                            height = canvas_y
-
-                        if width > canvas_x or height > canvas_y:  # in a bad case
-                            if width >= height:
-                                height = int(height / width * smaller)
-                                width = smaller
-                            else:
-                                width = int(width / height * smaller)
-                                height = smaller
-
-                    im = im.resize((width, height))
-                    im.save("i.png")  # temporary save to work with the image in cv2
+                    pp = 1
+                    preProcess(image, pp).save("i.png")  # temporary save to work with the image in cv2
 
                     outdata = []
                     img = cv2.imread("i.png")
@@ -382,11 +483,10 @@ class Ui_MainWindow(object):
                         x1, y1, x2, y2 = line[0]  # coords of the lines
                         # offsetting and basically putting all the lines in the middle of the selected area
                         outdata.append(
-                            f"n,{x1 + offset_x + int((canvas_x - width) / 2)},{y1 + offset_y + int((canvas_y - height) / 2)}")
+                            f"n,{x1 + offset_x + int((canvas_x - preProcess.width) / 2)},{y1 + offset_y + int((canvas_y - preProcess.height) / 2)}")
                         outdata.append(
-                            f"{x2 + offset_x + int((canvas_x - width) / 2)},{y2 + offset_y + int((canvas_y - height) / 2)}")
+                            f"{x2 + offset_x + int((canvas_x - preProcess.width) / 2)},{y2 + offset_y + int((canvas_y - preProcess.height) / 2)}")
 
-                    time.sleep(1)
                     self.cmdLabel.setText("Drawing...")
                     self.cmdLabel.repaint()
                     drawCanny(outdata)
@@ -394,51 +494,16 @@ class Ui_MainWindow(object):
 
 
                 try:
-                    value = self.URLLineEdit.text()
-                    self.cmdLabel.setText("Processing image...")
-                    response = requests.get(f"{value}")
-                    image_bytes = io.BytesIO(response.content)  # gets the image from the URL
-                    image = Image.open(image_bytes).convert("RGBA")
-                    cannyOption(image)
+                    cannyOption(getImage())
                 except:
-                    self.cmdLabel.setText("Failed Processing...\nEnter a valid url (and) or choose another image")
-
-
+                    ProcessingError()
+            # ----------------------------------------------------------------------------------------------------------
+            # Floyd-Steinberg
             elif (self.DrawmodeBox.currentText()) == "Floyd-Steinberg-Dithering - Colored":
                 def ditheroption(image, palettedata, layers):
 
-                    im = image
-                    fill_color = (255, 255, 255)
+                    image_halfresized = preProcess(image, pp)
 
-                    if im.mode in ('RGBA', 'LA'):
-                        background = Image.new(im.mode[:-1], im.size, fill_color)
-                        background.paste(im, im.split()[-1])
-                        im = background
-                    im.convert('RGB')
-                    width, height = im.size
-
-                    if canvas_x > canvas_y:
-                        smaller = canvas_y
-                    else:
-                        smaller = canvas_x
-
-                    if width != int(canvas_x / pp) or height != int(canvas_y / pp):
-                        if width > height:
-                            height = int(height / width * canvas_x / pp)
-                            width = int(canvas_x / pp)
-                        else:
-                            width = int(width / height * canvas_y / pp)
-                            height = int(canvas_y / pp)
-
-                        if width > (canvas_x / pp) or height > (canvas_y / pp):
-                            if width >= height:
-                                height = int(height / width * smaller / pp)
-                                width = int(smaller / pp)
-                            else:
-                                width = int(width / height * smaller / pp)
-                                height = int(smaller / pp)
-
-                    image_halfresized = im.resize((width, height))
                     dummy = Image.new('P', (16, 16))  # creates an image to put the color palette on
                     dummy.putpalette(palettedata)
                     image_dithered = image_halfresized.convert("RGB").quantize(
@@ -446,101 +511,26 @@ class Ui_MainWindow(object):
                     # the dummy image using floyd-steinberg dithering
                     image_dithered.save(
                         "img_dither.png")  # temporary save because pillow doesn't like mode P for getting the pixels
-
-                    c0 = []
-                    c1 = []
-                    c2 = []
-                    c3 = []
-                    c4 = []
-                    c5 = []
-                    c6 = []
-                    c7 = []
-                    c8 = []
-                    c9 = []
-                    c10 = []
-                    c11 = []
-                    c12 = []
-                    c13 = []
-                    c14 = []
-                    c15 = []
-                    c16 = []
-                    c17 = []
-                    c18 = []
-                    c19 = []  # this looks so ugly :(
-                    c20 = []
-                    c21 = []
-                    c22 = []
-                    c23 = []
-                    c24 = []
-                    c25 = []
-                    c26 = []
-                    c27 = []
-                    c28 = []
-                    c29 = []
-                    c30 = []
-                    c31 = []
-                    c32 = []
-                    c33 = []
-                    c34 = []
-                    c35 = []
-                    c36 = []
-                    c37 = []
-                    c38 = []
-                    # if you want to use more colors, add more arrays here and put them in pixels
-                    # (using fewer colors is no problem)
-                    pixels = [c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19,
-                              c20,
-                              c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32, c33, c34, c35, c36, c37,
-                              c38]  # <--
-                    coordinates = []
-                    coords = open("settings\colors_coordinates.txt", "r")  # reads the coords for the color selections
-                    for cor in coords:
-                        coordinates.append(int(cor))
-                    w = 0
-                    t = 0
-                    while w < len(coordinates):
-                        pixels[t].append(coordinates[w])  # and adds them to the pixel list for the right color
-                        pixels[t].append(coordinates[w + 1])
-                        t += 1
-                        w += 2
                     image_dithered = Image.open("img_dither.png").convert('RGB')
-                    x, y = image_dithered.size
 
-                    def getcoords():  # gets the coords of the pixels that have the same rgb values as the color
+                    pixels = initPixels()
 
-                        color = [palettedata[a], palettedata[a + 1], palettedata[a + 2]]
-                        red = color[0]
-                        green = color[1]
-                        blue = color[2]
+                    initCoords(pixels)
 
-                        for j in range(y):
-                            for i in range(x):
-                                r, g, b = image_dithered.getpixel((i, j))
-                                if (r, g, b) == (red, green, blue):
-                                    pixels[v].append(i)
-                                    pixels[v].append(j)
-
-                    length = len(
-                        palettedata) - 3  # -3 for white because white is the background color
-                    a = 0  # (if not simply do click on white while calibrating)
-                    v = 0
-                    while a < length:
-                        getcoords()
-                        a += 3
-                        v += 1
+                    getPixels(image_dithered, pixels)
                     # the data is ready now...
                     os.remove("img_dither.png")  # hide the evidence O_o
 
-                    def drawFS1(b, c, layers):  # this draws all the pixels of one color (e) divided by c for the layers
+                    def drawColor(b, c, layers):  # this draws all the pixels of one color
                         cc = speeed
                         pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
                         pyautogui.click()
                         while c < len(pixels[b]):
                             if keyboard.is_pressed('q'):
                                 break
-                            mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - width * pp) / 2)),
+                            mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
                                        # similar to canny option
-                                       int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
+                                       int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
                                        # but upscaling
                                        absolute=True, duration=0)  # with pp (brush size)
                             mouse.click(button='left')
@@ -549,7 +539,7 @@ class Ui_MainWindow(object):
                                 time.sleep(0.05)  # every time the number of drawn pixels is too high it pauses
                                 cc += speeed
 
-                    def drawFS2():
+                    def drawLayers():
                         z = 0
                         c = 2
                         while z < layers:
@@ -562,7 +552,7 @@ class Ui_MainWindow(object):
                                     break
                                 try:
                                     if len(pixels[b]) > 2:
-                                        drawFS1(b, c, layers)  # draw one color
+                                        drawColor(b, c, layers)  # draw one color
                                         e += 1
                                     b += 1
                                 except:
@@ -571,7 +561,7 @@ class Ui_MainWindow(object):
                             z += 1
                             # I know there are many variables and there is probably a better way, but it works I guess
 
-                    def drawFS3(layers):  # this is for the adaptive layer option
+                    def drawAdaptive(layers):  # this is for the adaptive layer option
                         e = 0
                         b = 0
                         c = 2
@@ -582,14 +572,14 @@ class Ui_MainWindow(object):
                                 time.sleep(1)
                                 break
                             try:
-                                if e > int(sth * 3 / 4):  # <-- the last number determines which colors should
+                                if e > int(finalize.sth * 3 / 4):  # <-- the last number determines which colors should
                                     layers = 2  # be split in 2 layers here for eg (1 - 2/3) = 1/3, so one third of the colors will be
                                     c = 4  # drawn twice. the latest colors are the ones with the most pixels because they get sorted
-                                    drawFS1(b, c, layers)  # you can experiment with that number...
+                                    drawColor(b, c, layers)  # you can experiment with that number...
                                     bb.append(b)
                                     e += 1
                                 elif len(pixels[b]) > 2:
-                                    drawFS1(b, c, layers)
+                                    drawColor(b, c, layers)
                                     e += 1
                                 b += 1
                             except:
@@ -599,78 +589,31 @@ class Ui_MainWindow(object):
                         while True:
                             try:
                                 while True:
-                                    drawFS1(bb[e], c, layers)
+                                    drawColor(bb[e], c, layers)
                                     e += 1
                             except:
                                 break
 
-                    pixels.sort(
-                        key=len)  # here its sorts all color entries in pixels by their length to draw the ones with fewer colors first
-                    # as they are likely to be the outlines so that it's easier to recognize the drawing fast
+                    finalize(pixels)
 
-                    sth = 0
-                    for ol in pixels:  # getting colors that are actually going to be used
-                        if len(ol) > 2:
-                            sth += 1
-
-                    time.sleep(1)
-                    self.cmdLabel.setText(f"Drawing... {sth} colors are being used")
-                    self.cmdLabel.repaint()
                     if layers == 314159:  # when choosing adaptive I set layers to be 100 so this is where it checks for that
                         layers = 1
-                        drawFS3(layers)
+                        drawAdaptive(layers)
                         self.cmdLabel.setText("Finished !")
 
                     else:
-                        drawFS2()
+                        drawLayers()
                         self.cmdLabel.setText("Finished !")
 
-
                 try:
-                    value = self.URLLineEdit.text()
-                    self.cmdLabel.setText("Processing image...")
-                    response = requests.get(f"{value}")
-                    image_bytes = io.BytesIO(response.content)
-                    image = Image.open(image_bytes).convert("RGBA")
-                    ditheroption(image, palettedata, layers)
+                    ditheroption(getImage(), palettedata, layers)
                     break
                 except:
-                    self.cmdLabel.setText("Failed Processing...\nEnter a valid url (and) or choose another image")
+                    ProcessingError()
 
             elif (self.DrawmodeBox.currentText()) == "Floyd-Steinberg-Dithering - Black and White":
                 def ditheroptionblack(image):
-
-                    im = image
-                    fill_color = (255, 255, 255)
-                    if im.mode in ('RGBA', 'LA'):
-                        background = Image.new(im.mode[:-1], im.size, fill_color)
-                        background.paste(im, im.split()[-1])
-                        im = background
-                    im.convert('RGB')
-                    width, height = im.size
-
-                    if canvas_x > canvas_y:
-                        smaller = canvas_y
-                    else:
-                        smaller = canvas_x
-
-                    if width != int(canvas_x / pp) or height != int(canvas_y / pp):
-                        if width > height:
-                            height = int(height / width * canvas_x / pp)
-                            width = int(canvas_x / pp)
-                        else:
-                            width = int(width / height * canvas_y / pp)
-                            height = int(canvas_y / pp)
-
-                        if width > (canvas_x / pp) or height > (canvas_y / pp):
-                            if width >= height:
-                                height = int(height / width * smaller / pp)
-                                width = int(smaller / pp)
-                            else:
-                                width = int(width / height * smaller / pp)
-                                height = int(smaller / pp)
-
-                    image_halfresized = im.resize((width, height))
+                    image_halfresized = preProcess(image, pp)
 
                     image_dithered = image_halfresized.convert('1')  # that's all you need for B/W dithering
                     image_dithered.save("img_dither.png")
@@ -687,15 +630,17 @@ class Ui_MainWindow(object):
                     os.remove("img_dither.png")
 
                     def drawblack():
-                        c = 0
+                        c = 2
                         cc = speeed
+                        clickonblack()
+
                         while c < len(pixelsBlack):
                             if keyboard.is_pressed('q'):
                                 self.cmdLabel.setText("Drawing interrupted")
                                 time.sleep(1)
                                 break
-                            mouse.move(int(pixelsBlack[c] * pp + offset_x + int((canvas_x - width * pp) / 2)),
-                                       int(pixelsBlack[c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
+                            mouse.move(int(pixelsBlack[c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                       int(pixelsBlack[c + 1] * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
                                        absolute=True, duration=0)
                             mouse.click(button='left')
                             c += 2
@@ -703,148 +648,41 @@ class Ui_MainWindow(object):
                                 time.sleep(0.05)
                                 cc += speeed
 
-                    time.sleep(1)
                     self.cmdLabel.setText("Drawing...")
                     self.cmdLabel.repaint()
                     drawblack()
                     self.cmdLabel.setText("Finished !")
 
-
                 try:
-                    value = self.URLLineEdit.text()
-                    self.cmdLabel.setText("Processing image...")
-                    response = requests.get(f"{value}")
-                    image_bytes = io.BytesIO(response.content)
-                    image = Image.open(image_bytes).convert("RGBA")
-                    ditheroptionblack(image)
+                    ditheroptionblack(getImage())
                 except:
-                    self.cmdLabel.setText("Failed Processing...\nEnter a valid url (and) or choose another image")
-
+                    ProcessingError()
+            # ----------------------------------------------------------------------------------------------------------
+            # Quantized stuff
             elif (self.DrawmodeBox.currentText()) == "Quantized Image - color by color":
 
                 def quantizeOption(image, palettedata):
 
                     layers = 1  # no layers here im lazy and changing everything isn't worth it
-                    im = image
-                    fill_color = (255, 255, 255)
-                    if im.mode in ('RGBA', 'LA'):
-                        background = Image.new(im.mode[:-1], im.size,
-                                               fill_color)
-                        background.paste(im, im.split()[-1])
-                        im = background
-                    im.convert('RGB')
-                    width, height = im.size
+                    image_halfresized = preProcess(image, pp)
 
-                    if canvas_x > canvas_y:
-                        smaller = canvas_y
-                    else:
-                        smaller = canvas_x
-
-                    if width != int(canvas_x / pp) or height != int(canvas_y / pp):
-                        if width > height:
-                            height = int(height / width * canvas_x / pp)
-                            width = int(canvas_x / pp)
-                        else:
-                            width = int(width / height * canvas_y / pp)
-                            height = int(canvas_y / pp)
-
-                        if width > (canvas_x / pp) or height > (canvas_y / pp):
-                            if width >= height:
-                                height = int(height / width * smaller / pp)
-                                width = int(smaller / pp)
-                            else:
-                                width = int(width / height * smaller / pp)
-                                height = int(smaller / pp)
-
-                    image_halfresized = im.resize((width, height))
                     dummy = Image.new('P', (16, 16))
                     dummy.putpalette(palettedata)
                     image_quantized = image_halfresized.convert("RGB").quantize(palette=dummy,
                                                                                 dither=False)  # no dithering this time
                     image_quantized.save("img_quant.png")
 
-                    c0 = []
-                    c1 = []
-                    c2 = []
-                    c3 = []
-                    c4 = []
-                    c5 = []
-                    c6 = []
-                    c7 = []
-                    c8 = []
-                    c9 = []
-                    c10 = []
-                    c11 = []
-                    c12 = []
-                    c13 = []
-                    c14 = []
-                    c15 = []
-                    c16 = []
-                    c17 = []
-                    c18 = []
-                    c19 = []  # this still looks ugly :(
-                    c20 = []
-                    c21 = []
-                    c22 = []
-                    c23 = []
-                    c24 = []
-                    c25 = []
-                    c26 = []
-                    c27 = []
-                    c28 = []
-                    c29 = []
-                    c30 = []
-                    c31 = []
-                    c32 = []
-                    c33 = []
-                    c34 = []
-                    c35 = []
-                    c36 = []
-                    c37 = []
-                    c38 = []
+                    pixels = initPixels()
 
-                    pixels = [c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16, c17, c18, c19,
-                              c20,
-                              c21, c22, c23, c24, c25, c26, c27, c28, c29, c30, c31, c32, c33, c34, c35, c36, c37, c38]
-                    coordinates = []
-                    coords = open("settings\colors_coordinates.txt", "r")
-                    for cor in coords:
-                        coordinates.append(int(cor))
-                    w = 0
-                    t = 0
-                    while w < len(coordinates):
-                        pixels[t].append(coordinates[w])
-                        pixels[t].append(coordinates[w + 1])
-                        t += 1
-                        w += 2
+                    initCoords(pixels)
+
                     image_quant = Image.open("img_quant.png").convert('RGB')
-                    x, y = image_quant.size
 
-                    def getcoords():
-
-                        color = [palettedata[a], palettedata[a + 1], palettedata[a + 2]]
-                        red = color[0]
-                        green = color[1]
-                        blue = color[2]
-
-                        for j in range(y):
-                            for i in range(x):
-                                r, g, b = image_quant.getpixel((i, j))
-                                if (r, g, b) == (red, green, blue):
-                                    pixels[v].append(i)
-                                    pixels[v].append(j)
-
-                    length = len(palettedata) - 3
-                    a = 0
-                    v = 0
-                    while a < length:
-                        getcoords()
-                        a += 3
-                        v += 1
+                    getPixels(image_quant, pixels)
                     # the data is ready now...
                     os.remove("img_quant.png")
 
-                    def drawQuantize1(b, c):
+                    def drawQuantize1(b, c):  # draw one color
                         cc = speeed
                         pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
                         pyautogui.click()
@@ -852,8 +690,8 @@ class Ui_MainWindow(object):
 
                             if keyboard.is_pressed('q'):  # Failsafe
                                 break
-                            mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - width * pp) / 2)),
-                                       int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - height * pp) / 2)),
+                            mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                       int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
                                        absolute=True, duration=0)
                             mouse.press(
                                 button='left')  # here I am holding down the mouse button, instead of clicking on every pixel
@@ -868,18 +706,18 @@ class Ui_MainWindow(object):
                                                 count += 2
                                             else:
                                                 mouse.move(int(pixels[b][c + count] * pp + offset_x + int(
-                                                    (canvas_x - width * pp) / 2)),
+                                                    (canvas_x - preProcess.width * pp) / 2)),
                                                            int(pixels[b][c + 1] * pp + offset_y + int(
-                                                               (canvas_y - height * pp) / 2)),
+                                                               (canvas_y - preProcess.height * pp) / 2)),
                                                            absolute=True, duration=0)
                                                 if count >= 4:
                                                     time.sleep(0.05)
                                                 break  # I don't know why this is needed 2 times, but it only worked like that...
                                         except:
                                             mouse.move(int(pixels[b][c + count] * pp + offset_x + int(
-                                                (canvas_x - width * pp) / 2)),
+                                                (canvas_x - preProcess.width * pp) / 2)),
                                                        int(pixels[b][c + 1] * pp + offset_y + int(
-                                                           (canvas_y - height * pp) / 2)),
+                                                           (canvas_y - preProcess.height * pp) / 2)),
                                                        absolute=True, duration=0)
                                             if count >= 4:
                                                 time.sleep(
@@ -894,7 +732,7 @@ class Ui_MainWindow(object):
                                 time.sleep(int(1 / speeed))
                                 cc += speeed
 
-                    def drawQuantize2():
+                    def drawQuantize():
                         z = 0
                         c = 2
                         while z < layers:
@@ -915,66 +753,24 @@ class Ui_MainWindow(object):
                             c += 2
                             z += 1
 
-                    pixels.sort(key=len)
+                    finalize(pixels)
 
-                    sth = 0
-                    for ol in pixels:
-                        if len(ol) > 2:
-                            sth += 1
-
-                    time.sleep(1)
-                    self.cmdLabel.setText(f"Drawing... {sth} colors are being used")
+                    self.cmdLabel.setText(f"Drawing... {finalize.sth} colors are being used")
                     self.cmdLabel.repaint()
-                    drawQuantize2()
+                    drawQuantize()
                     self.cmdLabel.setText("Finished !")
 
 
                 try:
-                    value = self.URLLineEdit.text()
-                    self.cmdLabel.setText("Processing image...")
-                    response = requests.get(f"{value}")
-                    image_bytes = io.BytesIO(response.content)
-                    image = Image.open(image_bytes).convert("RGBA")
-                    quantizeOption(image, palettedata)
+                    quantizeOption(getImage(), palettedata)
                 except:
-                    self.cmdLabel.setText("Failed Processing...\nEnter a valid url (and) or choose another image")
-
+                    ProcessingError()
+            # ----------------------------------------------------------------------------------------------------------
             elif (self.DrawmodeBox.currentText()) == "Quantized Image - line by line":
 
                 def quantizeOptionlines(image, palettedata):
 
-                    im = image
-                    fill_color = (255, 255, 255)
-                    if im.mode in ('RGBA', 'LA'):
-                        background = Image.new(im.mode[:-1], im.size,
-                                               fill_color)
-                        background.paste(im, im.split()[-1])
-                        im = background
-                    im.convert('RGB')
-                    width, height = im.size
-
-                    if canvas_x > canvas_y:
-                        smaller = canvas_y
-                    else:
-                        smaller = canvas_x
-
-                    if width != int(canvas_x / pp) or height != int(canvas_y / pp):
-                        if width > height:
-                            height = int(height / width * canvas_x / pp)
-                            width = int(canvas_x / pp)
-                        else:
-                            width = int(width / height * canvas_y / pp)
-                            height = int(canvas_y / pp)
-
-                        if width > (canvas_x / pp) or height > (canvas_y / pp):
-                            if width >= height:
-                                height = int(height / width * smaller / pp)
-                                width = int(smaller / pp)
-                            else:
-                                width = int(width / height * smaller / pp)
-                                height = int(smaller / pp)
-
-                    image_halfresized = im.resize((width, height))
+                    image_halfresized = preProcess(image, pp)
                     dummy = Image.new('P', (16, 16))
                     dummy.putpalette(palettedata)
                     image_quantized = image_halfresized.convert("RGB").quantize(palette=dummy,
@@ -1018,8 +814,8 @@ class Ui_MainWindow(object):
                                         mouse.move(coordinates[f], coordinates[f + 1], absolute=True, duration=0)
                                         mouse.click(button='left')
 
-                                        mouse.move(int(i * pp + offset_x + int((canvas_x - width * pp) / 2)),
-                                                   int(j * pp + offset_y + int((canvas_y - height * pp) / 2)),
+                                        mouse.move(int(i * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                                   int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
                                                    absolute=True, duration=0)
                                         mouse.press(button='left')
                                         ii = i
@@ -1036,8 +832,8 @@ class Ui_MainWindow(object):
                                             if keyboard.is_pressed('q'):  # Failsafe
                                                 break
 
-                                            mouse.move(int(i * pp + offset_x + int((canvas_x - width * pp) / 2)),
-                                                       int(j * pp + offset_y + int((canvas_y - height * pp) / 2)),
+                                            mouse.move(int(i * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                                       int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
                                                        absolute=True, duration=0)
                                             time.sleep((1000 - speeed) / 500)
                                             mouse.release(button='left')
@@ -1047,8 +843,8 @@ class Ui_MainWindow(object):
 
                                             mouse.release(button='left')
                                             while ii <= i:
-                                                mouse.move(int(ii * pp + offset_x + int((canvas_x - width * pp) / 2)),
-                                                           int(j * pp + offset_y + int((canvas_y - height * pp) / 2)),
+                                                mouse.move(int(ii * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                                           int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
                                                            absolute=True, duration=0)
                                                 mouse.click(button='left')
                                                 ii += 1
@@ -1059,22 +855,17 @@ class Ui_MainWindow(object):
                                 i += 1
                         os.remove("img_quant.png")
 
-                    time.sleep(1)
                     self.cmdLabel.setText("Drawing...")
                     self.cmdLabel.repaint()
                     drawQuantLines()
                     self.cmdLabel.setText("Finished !")
 
                 try:
-                    value = self.URLLineEdit.text()
-                    self.cmdLabel.setText("Processing image...")
-                    response = requests.get(f"{value}")
-                    image_bytes = io.BytesIO(response.content)
-                    image = Image.open(image_bytes).convert("RGBA")
-                    quantizeOptionlines(image, palettedata)
+                    quantizeOptionlines(getImage(), palettedata)
                 except:
-                    self.cmdLabel.setText("Failed Processing...\nEnter a valid url (and) or choose another image")
-            break
+                    ProcessingError()
+            # ----------------------------------------------------------------------------------------------------------
+            break  # while loop
 
     def pressedCalCanvas(self):  # pyqt5 seems to freeze on basically every while loop that's why I use another script
         os.system("start cmd /K")
