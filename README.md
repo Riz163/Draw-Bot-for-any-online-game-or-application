@@ -37,4 +37,4 @@ Examples:
 ![goofy](https://user-images.githubusercontent.com/108233076/175929283-a5b94884-7071-4211-a84e-f5b2f5f4beb6.gif)
 ![skribbl-Practise-by-get kolmus](https://user-images.githubusercontent.com/108233076/178114034-246d8fd7-6e62-4751-8d0a-1335f292f1d4.gif)
 ![skribbl-Practise-by-whoami](https://user-images.githubusercontent.com/108233076/178746472-2af700ae-4e46-495d-a479-ad28579a032c.gif)
-
+![cat](https://user-images.githubusercontent.com/108233076/181997267-e1d9c9f9-00ac-4ea7-831e-9c5248c2bdfd.gif)
