@@ -442,6 +442,7 @@ class Ui_MainWindow(object):  # setting up the window
                     return contours
 
                 def draw(contours):
+                    clickonblack()
                     for n, contour in enumerate(contours):
                         if keyboard.is_pressed('q'):
                             self.cmdLabel.setText("Drawing interrupted")
