@@ -14,7 +14,7 @@ while True:
     except ImportError:
         dep = ["pynput", "autoit", "numpy", "opencv-python", "pyautogui",
                "pillow", "requests", "keyboard", "mouse", "pyscreeze", "PyQt5",
-               "simplification", "skimage", "matplotlib"]  # For every dep added put it in this list
+               "simplification", "scikit-image", "matplotlib"]  # For every dep added put it in this list
         print("Import error\nDownloading dependencies...")
         time.sleep(3)
         for i in dep:
