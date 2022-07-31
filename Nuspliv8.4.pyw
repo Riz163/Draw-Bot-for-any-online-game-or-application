@@ -510,7 +510,7 @@ class Ui_MainWindow(object):  # setting up the window
                     ProcessingError()
 
 
-            elif (self.DrawmodeBox.currentText()) == "Canny - outlines":
+            elif (self.DrawmodeBox.currentText()) == "Canny - outlines just lines":
 
                 mou = ms.Controller()
 
@@ -580,7 +580,7 @@ class Ui_MainWindow(object):  # setting up the window
                     ProcessingError()
             # ----------------------------------------------------------------------------------------------------------
             # Floyd-Steinberg
-            elif (self.DrawmodeBox.currentText()) == "Floyd-Steinberg-Dithering - Colored":
+            elif (self.DrawmodeBox.currentText()) == "Floyd-Steinberg-Dithering - colored":
                 def ditheroption(image, palettedata, layers):
 
                     image_halfresized = preProcess(image, pp)
@@ -692,7 +692,7 @@ class Ui_MainWindow(object):  # setting up the window
                 except:
                     ProcessingError()
 
-            elif (self.DrawmodeBox.currentText()) == "Floyd-Steinberg-Dithering - Black and White":
+            elif (self.DrawmodeBox.currentText()) == "Floyd-Steinberg-Dithering - black and white":
                 def ditheroptionblack(image):
                     image_halfresized = preProcess(image, pp)
 
