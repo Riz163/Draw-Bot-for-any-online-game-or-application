@@ -451,30 +451,33 @@ class Ui_MainWindow(object):  # setting up the window
 
                         a = 0
                         for x in contour[1:]:
+                            ran = random.randint(0, 10)
                             if a == 0:
                                 mouse.release(button='left')
                                 mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                            x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
                                            absolute=True, duration=0)
-                                time.sleep(random.randint(1, 5) / 25)
+                                time.sleep(1/500*ran)
                                 a = 1
                             else:
                                 mouse.press(button='left')
                                 mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                           x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
-                                           absolute=True, duration=random.randint(1, 10) / (speeed/10))  # change randomizers if you want
-                                time.sleep(1/speeed)
+                                           x[0] + offset_y  + int((canvas_y - preProcess.height) / 2),
+                                           absolute=True, duration=10/speeed)  # change randomizers if you want
+                                time.sleep(2/500*ran)
                                 mouse.release(button='left')
                                 if keyboard.is_pressed('q'):
                                     break
 
                 def process():
                     pp = 1
-                    preProcess(getImage(), pp).convert('RGB').save("i.png")
+                    preProcess(getImage(), pp).convert('RGB').convert('1', dither=False).convert('RGB').save("i.png")
+
                     img = mpimg.imread("i.png")
                     os.remove("i.png")
 
                     black = skimage.color.rgb2gray(img)
+
                     contours = []
                     imgs = []
                     imgs += [black]
@@ -554,7 +557,7 @@ class Ui_MainWindow(object):  # setting up the window
 
                     outdata = []
                     img = cv2.imread("i.png")
-                    os.remove("i.png")  # deleting itt
+                    os.remove("i.png")  # deleting it
 
                     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # grayscales the image to work better with the
                     edges = cv2.Canny(gray, 75, 150)  # canny edge detection algorithm
