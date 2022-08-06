@@ -6,6 +6,8 @@ while True:
         from PIL import Image
         from pynput.mouse import Button
         from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+        from PyQt5.QtGui import QKeySequence
+        from PyQt5.QtWidgets import QShortcut
         from simplification.cutil import simplify_coords
         import skimage
         import matplotlib.image as mpimg
@@ -226,6 +228,7 @@ class Ui_MainWindow(object):  # setting up the window
 
         #  connecting the buttons to functions
         self.DrawButton.clicked.connect(self.pressedDraw)
+
         self.CalibrateCanvasButton.clicked.connect(self.pressedCalCanvas)
         self.CalibrateColorsButton.clicked.connect(self.pressedCalColors)
 
@@ -260,8 +263,7 @@ class Ui_MainWindow(object):  # setting up the window
         self.DrawButton.setText(_translate("MainWindow", "Draw"))
         self.QuitDrawLabel.setText(_translate("MainWindow", "(Press q to quit)"))
 
-
-    def pressedDraw(self):  # when draw button is pressed
+    def start_drawing(self):
         #  some functions for later -----------------------------------------------------------------------------------
         def getImage():
             url = self.URLLineEdit.text()
@@ -387,6 +389,7 @@ class Ui_MainWindow(object):  # setting up the window
                 t += 3
             pyautogui.moveTo(Black[0], Black[1])  # click on black
             pyautogui.click()
+
         #  ------------------------------------------------------------------------------------------------------------
         while True:
             # first of all, update the settings
@@ -410,7 +413,8 @@ class Ui_MainWindow(object):  # setting up the window
                 canvas_y = canvas[3] - canvas[1]
 
             except:
-                self.cmdLabel.setText("couldn't find all necessary setting files !\nPlease make sure they exist or calibrate first !")
+                self.cmdLabel.setText(
+                    "couldn't find all necessary setting files !\nPlease make sure they exist or calibrate first !")
                 break
 
             # then check all gui settings
@@ -437,6 +441,7 @@ class Ui_MainWindow(object):  # setting up the window
             # Canny mode -----------------------------------------------------------------------------------------------
             if (self.DrawmodeBox.currentText()) == "Canny - outlines human like":
                 """ This is new, no comments yet..."""
+
                 def goodify(contours):
                     contours.sort(key=(lambda x: len(x)), reverse=True)
                     return contours
@@ -452,26 +457,42 @@ class Ui_MainWindow(object):  # setting up the window
                         a = 0
                         for x in contour[1:]:
                             ran = random.randint(0, 10)
+                            if keyboard.is_pressed('s'):  # pause and play
+                                while True:
+                                    time.sleep(0.1)
+                                    if keyboard.is_pressed('s'):
+                                        mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                                   x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
+                                                   absolute=True, duration=0 / speeed)
+                                        break
                             if a == 0:
                                 mouse.release(button='left')
                                 mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                            x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
                                            absolute=True, duration=0)
-                                time.sleep(1/500*ran)
+                                time.sleep(1 / 500 * ran)
                                 a = 1
                             else:
                                 mouse.press(button='left')
                                 mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                           x[0] + offset_y  + int((canvas_y - preProcess.height) / 2),
-                                           absolute=True, duration=10/speeed)  # change randomizers if you want
-                                time.sleep(2/500*ran)
+                                           x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
+                                           absolute=True, duration=5 / speeed)  # change randomizers if you want
+                                time.sleep(1 / 500 * ran)
                                 mouse.release(button='left')
                                 if keyboard.is_pressed('q'):
                                     break
 
                 def process():
                     pp = 1
-                    preProcess(getImage(), pp).convert('RGB').convert('1', dither=False).convert('RGB').save("i.png")
+                    preProcess(getImage(), pp).convert('RGB').save("i.png")
+                    img = cv2.imread("i.png")
+                    os.remove("i.png")  # deleting it
+
+                    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # grayscales the image to work better with the
+                    edges = cv2.Canny(gray, 75, 150)  # canny edge detection algorithm
+
+                    cv2.imwrite("i.png", edges)
+                    Image.open("i.png").convert('RGB').save("i.png")
 
                     img = mpimg.imread("i.png")
                     os.remove("i.png")
@@ -527,13 +548,14 @@ class Ui_MainWindow(object):  # setting up the window
                 def drawCanny(pointArr):
                     clickonblack()
                     mou.position = (
-                    getXandY(pointArr[0], 0), getXandY(pointArr[0], 1))  # First entry is the start position
+                        getXandY(pointArr[0], 0), getXandY(pointArr[0], 1))  # First entry is the start position
                     ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
 
                     for i in range(1, len(pointArr)):  # Skip first entry
                         if "n" in pointArr[i]:
                             mou.position = (
-                            getXandY(pointArr[i], 0), getXandY(pointArr[i], 1))  # Position the mouse to the new area
+                                getXandY(pointArr[i], 0),
+                                getXandY(pointArr[i], 1))  # Position the mouse to the new area
                             ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
 
                         if keyboard.is_pressed('q'):  # Failsafe
@@ -576,7 +598,6 @@ class Ui_MainWindow(object):  # setting up the window
                     drawCanny(outdata)
                     self.cmdLabel.setText("Finished !")
 
-
                 try:
                     cannyOption(getImage())
                 except:
@@ -614,7 +635,8 @@ class Ui_MainWindow(object):  # setting up the window
                                 break
                             mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
                                        # similar to canny option
-                                       int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
+                                       int(pixels[b][c + 1] * pp + offset_y + int(
+                                           (canvas_y - preProcess.height * pp) / 2)),
                                        # but upscaling
                                        absolute=True, duration=0)  # with pp (brush size)
                             mouse.click(button='left')
@@ -723,9 +745,10 @@ class Ui_MainWindow(object):  # setting up the window
                                 self.cmdLabel.setText("Drawing interrupted")
                                 time.sleep(1)
                                 break
-                            mouse.move(int(pixelsBlack[c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
-                                       int(pixelsBlack[c + 1] * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
-                                       absolute=True, duration=0)
+                            mouse.move(
+                                int(pixelsBlack[c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                int(pixelsBlack[c + 1] * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
+                                absolute=True, duration=0)
                             mouse.click(button='left')
                             c += 2
                             if c == cc:
@@ -775,7 +798,8 @@ class Ui_MainWindow(object):  # setting up the window
                             if keyboard.is_pressed('q'):  # Failsafe
                                 break
                             mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
-                                       int(pixels[b][c + 1] * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
+                                       int(pixels[b][c + 1] * pp + offset_y + int(
+                                           (canvas_y - preProcess.height * pp) / 2)),
                                        absolute=True, duration=0)
                             mouse.press(
                                 button='left')  # here I am holding down the mouse button, instead of clicking on every pixel
@@ -844,7 +868,6 @@ class Ui_MainWindow(object):  # setting up the window
                     drawQuantize()
                     self.cmdLabel.setText("Finished !")
 
-
                 try:
                     quantizeOption(getImage(), palettedata)
                 except:
@@ -899,7 +922,8 @@ class Ui_MainWindow(object):  # setting up the window
                                         mouse.click(button='left')
 
                                         mouse.move(int(i * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
-                                                   int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
+                                                   int(j * pp + offset_y + int(
+                                                       (canvas_y - preProcess.height * pp) / 2)),
                                                    absolute=True, duration=0)
                                         mouse.press(button='left')
                                         ii = i
@@ -916,9 +940,10 @@ class Ui_MainWindow(object):  # setting up the window
                                             if keyboard.is_pressed('q'):  # Failsafe
                                                 break
 
-                                            mouse.move(int(i * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
-                                                       int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
-                                                       absolute=True, duration=0)
+                                            mouse.move(
+                                                int(i * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                                int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
+                                                absolute=True, duration=0)
                                             time.sleep((1000 - speeed) / 500)
                                             mouse.release(button='left')
                                         else:
@@ -927,8 +952,10 @@ class Ui_MainWindow(object):  # setting up the window
 
                                             mouse.release(button='left')
                                             while ii <= i:
-                                                mouse.move(int(ii * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
-                                                           int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
+                                                mouse.move(int(ii * pp + offset_x + int(
+                                                    (canvas_x - preProcess.width * pp) / 2)),
+                                                           int(j * pp + offset_y + int(
+                                                               (canvas_y - preProcess.height * pp) / 2)),
                                                            absolute=True, duration=0)
                                                 mouse.click(button='left')
                                                 ii += 1
@@ -950,6 +977,9 @@ class Ui_MainWindow(object):  # setting up the window
                     ProcessingError()
             # ----------------------------------------------------------------------------------------------------------
             break  # while loop
+
+    def pressedDraw(self):  # when draw button is pressed (or enter)
+        self.start_drawing()
 
     def pressedCalCanvas(self):  # pyqt5 seems to freeze on basically every while loop that's why I use another script
         os.system("start cmd /K")
