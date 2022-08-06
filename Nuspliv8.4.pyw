@@ -457,30 +457,36 @@ class Ui_MainWindow(object):  # setting up the window
                         a = 0
                         for x in contour[1:]:
                             ran = random.randint(0, 10)
-                            if keyboard.is_pressed('s'):  # pause and play
-                                while True:
-                                    time.sleep(0.1)
-                                    if keyboard.is_pressed('s'):
-                                        mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                                   x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
-                                                   absolute=True, duration=0 / speeed)
-                                        break
+
                             if a == 0:
                                 mouse.release(button='left')
                                 mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                            x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
                                            absolute=True, duration=0)
-                                time.sleep(1 / 500 * ran)
+                                time.sleep(1 / 100 * ran)
                                 a = 1
                             else:
-                                mouse.press(button='left')
+                                if not mouse.is_pressed(button='left'):
+                                    mouse.press(button='left')
                                 mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                            x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
                                            absolute=True, duration=5 / speeed)  # change randomizers if you want
                                 time.sleep(1 / 500 * ran)
-                                mouse.release(button='left')
                                 if keyboard.is_pressed('q'):
                                     break
+
+                            if keyboard.is_pressed('s'):  # pause and play
+                                mouse.release(button='left')
+                                time.sleep(0.5)
+                                while True:
+                                    time.sleep(0.05)
+                                    if keyboard.is_pressed('s'):
+                                        time.sleep(0.25)
+                                        mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                                   x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
+                                                   absolute=True, duration=0)
+                                        break
+                    mouse.release(button='left')
 
                 def process():
                     pp = 1
