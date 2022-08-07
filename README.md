@@ -8,6 +8,7 @@ for eg:
 * ms paint
 
 features:
+* outline drawing like a human (kinda)
 * outline drawing with lines
 * colored dithering
 * black and white dithering
