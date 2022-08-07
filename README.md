@@ -15,7 +15,7 @@ features:
 * quantized drawing for faster times (color by color or line by line)
 * settings for colors, brushsize, speed and drawing area
 * uses image URL
-\
+
 * keyboard mode - run the file and hit f9 to enter and exit keyboard mode, for now only A ... Z and whitespace are supported
 
 run it by simply double clicking the Nuspli file and on first run it should install all the requirements on its own\
