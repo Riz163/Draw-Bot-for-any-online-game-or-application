@@ -11,6 +11,7 @@ while True:
         from simplification.cutil import simplify_coords
         import skimage
         import matplotlib.image as mpimg
+
         break
 
     except ImportError:
@@ -22,12 +23,14 @@ while True:
         for i in dep:
             os.system(f"cmd /c pip install {i}")
 
+
 class Ui_MainWindow(object):  # setting up the window
 
     def setupUi(self, MainWindow):
 
         MainWindow.setWindowIcon(QtGui.QIcon('logo.png'))  # logo
-        MainWindow.setWindowFlags(MainWindow.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)  # make it always stay on top
+        MainWindow.setWindowFlags(
+            MainWindow.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)  # make it always stay on top
         MainWindow.setObjectName("Nuspliv8.4")
         MainWindow.resize(379, 393)
         MainWindow.setMinimumSize(QtCore.QSize(379, 393))
@@ -102,7 +105,7 @@ class Ui_MainWindow(object):  # setting up the window
         self.cmdLabel.setWordWrap(True)
         self.cmdLabel.setStyleSheet("")
         self.cmdLabel.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.cmdLabel.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.cmdLabel.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         self.cmdLabel.setObjectName("cmdLabel")
         self.InfoLabel = QtWidgets.QLabel(self.centralwidget)
         self.InfoLabel.setGeometry(QtCore.QRect(10, 131, 361, 41))
@@ -114,7 +117,7 @@ class Ui_MainWindow(object):  # setting up the window
         self.InfoLabel.setAutoFillBackground(False)
         self.InfoLabel.setStyleSheet("")
         self.InfoLabel.setFrameShadow(QtWidgets.QFrame.Plain)
-        self.InfoLabel.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
+        self.InfoLabel.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         self.InfoLabel.setObjectName("InfoLabel")
         self.line = QtWidgets.QFrame(self.centralwidget)
         self.line.setGeometry(QtCore.QRect(10, 11, 171, 20))
@@ -231,7 +234,6 @@ class Ui_MainWindow(object):  # setting up the window
 
         self.CalibrateCanvasButton.clicked.connect(self.pressedCalCanvas)
         self.CalibrateColorsButton.clicked.connect(self.pressedCalColors)
-
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -447,7 +449,10 @@ class Ui_MainWindow(object):  # setting up the window
                     return contours
 
                 def draw(contours):
-                    clickonblack()
+                    #clickonblack()
+
+                    slep = 0
+
                     for n, contour in enumerate(contours):
                         if keyboard.is_pressed('q'):
                             self.cmdLabel.setText("Drawing interrupted")
@@ -456,22 +461,31 @@ class Ui_MainWindow(object):  # setting up the window
 
                         a = 0
                         for x in contour[1:]:
-                            ran = random.randint(0, 10)
+                            ran = random.randint(1, 10)
+                            if speeed != 1000:
+                                slep = 1 / 500 * ran
 
                             if a == 0:
                                 mouse.release(button='left')
-                                mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                           x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
-                                           absolute=True, duration=0)
-                                time.sleep(1 / 100 * ran)
+                                ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                         x[0] + offset_y + int((canvas_y - preProcess.height) / 2))
+                                if speeed != 1000:
+                                    time.sleep(1 / 100 * ran)
+
                                 a = 1
                             else:
                                 if not mouse.is_pressed(button='left'):
                                     mouse.press(button='left')
-                                mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                           x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
-                                           absolute=True, duration=5 / speeed)  # change randomizers if you want
-                                time.sleep(1 / 500 * ran)
+                                if speeed != 1000:
+                                    mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                               x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
+                                               absolute=True, duration=5 / speeed)
+                                    time.sleep(slep)
+                                else:
+                                    ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                             x[0] + offset_y + int(
+                                                 (canvas_y - preProcess.height) / 2))  # change randomizers if you want
+
                                 if keyboard.is_pressed('q'):
                                     break
 
@@ -482,9 +496,8 @@ class Ui_MainWindow(object):  # setting up the window
                                     time.sleep(0.05)
                                     if keyboard.is_pressed('s'):
                                         time.sleep(0.25)
-                                        mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                                   x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
-                                                   absolute=True, duration=0)
+                                        ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                                 x[0] + offset_y + int((canvas_y - preProcess.height) / 2))
                                         break
                     mouse.release(button='left')
 
@@ -552,7 +565,7 @@ class Ui_MainWindow(object):  # setting up the window
                     return int(temp[select])
 
                 def drawCanny(pointArr):
-                    clickonblack()
+                    #clickonblack()
                     mou.position = (
                         getXandY(pointArr[0], 0), getXandY(pointArr[0], 1))  # First entry is the start position
                     ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
@@ -744,7 +757,7 @@ class Ui_MainWindow(object):  # setting up the window
                     def drawblack():
                         c = 2
                         cc = speeed
-                        clickonblack()
+                        #clickonblack()
 
                         while c < len(pixelsBlack):
                             if keyboard.is_pressed('q'):
@@ -998,6 +1011,7 @@ class Ui_MainWindow(object):  # setting up the window
         time.sleep(1)
         keyboard.write("python CalibrateColors.py")
         keyboard.send('enter')
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
