@@ -27,7 +27,7 @@ I belive this is the fastest and most versitile one out there and it's also very
 
 I also recommend using clipart images for faster drawing times (not necessary for dithering)
 
-YT demo:
+YT demo:\
 https://www.youtube.com/watch?v=s9wIJb-HGWI (Part 1)\
 https://www.youtube.com/watch?v=oVohdpzmmhU (Part 2)\
 https://www.youtube.com/watch?v=h99-rL7yrzY (Part 3)
