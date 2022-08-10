@@ -265,6 +265,7 @@ class Ui_MainWindow(object):  # setting up the window
         self.DrawButton.setText(_translate("MainWindow", "Draw"))
         self.QuitDrawLabel.setText(_translate("MainWindow", "(Press q to quit)"))
 
+    @property
     def start_drawing(self):
         #  some functions for later -----------------------------------------------------------------------------------
         def getImage():
@@ -314,11 +315,11 @@ class Ui_MainWindow(object):  # setting up the window
 
             preProcess.width = width
             preProcess.height = height
-            return im
+            return im  # the finished image
 
         def initPixels():
             pixels = []
-            for n in range(int((len(palettedata) - 3) / 3)):
+            for n in range(int((len(palettedata) - 3) / 3)):  # creates a list in pixels for every color
                 pixels.append([])
             return pixels
 
@@ -363,8 +364,8 @@ class Ui_MainWindow(object):  # setting up the window
 
         def finalize(pixels):
             pixels.sort(
-                key=len)  # here its sorts all color entries in pixels by their length to draw the ones with fewer colors first
-            # as they are likely to be the outlines so that it's easier to recognize the drawing fast
+                key=len)  # here it sorts all color entries in pixels by their length to draw the ones with fewer colors
+            # first, as they are likely to be the outlines so that it's easier to recognize the drawing fast
 
             sth = 0
             for ol in pixels:  # getting colors that are actually going to be used
@@ -375,6 +376,7 @@ class Ui_MainWindow(object):  # setting up the window
             self.cmdLabel.repaint()
 
         def clickonblack():
+            """optional function for b/w dithering and the canny modes"""
             Black = []
             coordis = []
             coords = open("settings\colors_coordinates.txt", "r")  # reads the coords for the color selections
@@ -392,21 +394,21 @@ class Ui_MainWindow(object):  # setting up the window
             pyautogui.moveTo(Black[0], Black[1])  # click on black
             pyautogui.click()
 
-        #  ------------------------------------------------------------------------------------------------------------
+        #  main function------------------------------------------------------------------------------------------------
         while True:
-            # first of all, update the settings
+            # first update the settings
             try:
                 palettedata = []
                 palette = open("settings\colors_palette.txt", "r")
                 for color in palette:
                     palettedata.append(int(color))
-                palettedata.append(255)  # adds white for dithering (but not for drawing)
+                palettedata.append(255)  # adding white for dithering (but not for drawing)
                 palettedata.append(255)
                 palettedata.append(255)
 
                 canvas = []
                 can = open("settings\canvas_settings.txt",
-                           "r")  # other methods didn't work really especially for the palettedata
+                           "r")  # other methods for the data storing didn't work really, especially for the palettedata
                 for posi in can:
                     canvas.append(int(posi))
                 offset_x = canvas[0]
@@ -426,23 +428,22 @@ class Ui_MainWindow(object):  # setting up the window
             except:
                 self.cmdLabel.setText("Enter a valid speed percentage !")
                 break
-            try:
-                pp = int(self.BrushSizetLineEdit.text())
-            except:
-                self.cmdLabel.setText("Enter a valid brush size !")
-                break
-            try:
-                if self.AdaptiveCheckBox.isChecked():
-                    layers = 314159
-                else:
-                    layers = int(self.LayersLineEdit.text())
-            except:
-                self.cmdLabel.setText("Enter a valid number of layers !")
-                break
-
+            if (self.DrawmodeBox.currentText()) != "Canny - outlines human like" and (self.DrawmodeBox.currentText()) != "Canny - outlines just lines":
+                try:  # ^since you don't need those for the canny modes
+                    pp = int(self.BrushSizetLineEdit.text())
+                except:
+                    self.cmdLabel.setText("Enter a valid brush size !")
+                    break
+                try:
+                    if self.AdaptiveCheckBox.isChecked():
+                        layers = 314159
+                    else:
+                        layers = int(self.LayersLineEdit.text())
+                except:
+                    self.cmdLabel.setText("Enter a valid number of layers !")
+                    break
             # Canny mode -----------------------------------------------------------------------------------------------
             if (self.DrawmodeBox.currentText()) == "Canny - outlines human like":
-                """ This is new, no comments yet..."""
 
                 def goodify(contours):
                     contours.sort(key=(lambda x: len(x)), reverse=True)
@@ -481,7 +482,7 @@ class Ui_MainWindow(object):  # setting up the window
                                                x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
                                                absolute=True, duration=5 / speeed)
                                     time.sleep(slep)
-                                else:
+                                else:  # at maximum speed --
                                     ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                              x[0] + offset_y + int(
                                                  (canvas_y - preProcess.height) / 2))  # change randomizers if you want
@@ -522,13 +523,13 @@ class Ui_MainWindow(object):  # setting up the window
                     imgs = []
                     imgs += [black]
 
-                    contours1 = goodify(skimage.measure.find_contours(black, 0.1, "high"))
-                    contours2 = goodify(skimage.measure.find_contours(black, 0.8, "high"))
+                    contour1 = goodify(skimage.measure.find_contours(black, 0.1, "high"))
+                    contour2 = goodify(skimage.measure.find_contours(black, 0.8, "high"))
 
-                    if (len(contours1) < len(contours2) and len(contours1) > 100):
-                        contours += [contours1[:300]]
+                    if (len(contour1) < len(contour2) and len(contour1) > 100):
+                        contours += [contour1[:300]]
                     else:
-                        contours += [contours2[:300]]
+                        contours += [contour2[:300]]
 
                     lengths = []
                     length = 0
@@ -543,11 +544,11 @@ class Ui_MainWindow(object):  # setting up the window
                     return best_contour, best_ind
 
                 try:
-                    choice, ind = process()
+                    outline, ind = process()
                     self.cmdLabel.setText("Drawing...")
                     self.cmdLabel.repaint()
 
-                    draw(choice)
+                    draw(outline)
                     self.cmdLabel.setText("Finished !")
                 except:
                     ProcessingError()
@@ -998,7 +999,7 @@ class Ui_MainWindow(object):  # setting up the window
             break  # while loop
 
     def pressedDraw(self):  # when draw button is pressed (or enter)
-        self.start_drawing()
+        self.start_drawing
 
     def pressedCalCanvas(self):  # pyqt5 seems to freeze on basically every while loop that's why I use another script
         os.system("start cmd /K")
