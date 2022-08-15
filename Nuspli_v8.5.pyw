@@ -1070,7 +1070,6 @@ class Ui_MainWindow(object):  # setting up the window
                                                 int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)) + 1)
                                             time.sleep((100 - (speeed / 10))/1000)
                                             mouse.release(button='left')
-                                            pro += 200 / ((x * y) * (i - ii) * 2)
                                         else:
                                             if keyboard.is_pressed('q'):  # Failsafe
                                                 break
@@ -1084,15 +1083,15 @@ class Ui_MainWindow(object):  # setting up the window
                                                            absolute=True, duration=0)
                                                 mouse.click(button='left')
                                                 ii += 1
-                                                pro += 400 / (x * y)
-                                        prog = "%.2f" % pro
 
                                         break
                                     else:
                                         a += 3
                                         f += 2
                                 i += 1
+                            pro += 100/y
                             QtCore.QCoreApplication.processEvents()
+                            prog = "%.2f" % pro
                             self.cmdLabel.setText(f"Drawing... {prog}%")
                             self.cmdLabel.repaint()
                         mouse.release(button='left')
