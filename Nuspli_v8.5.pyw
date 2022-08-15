@@ -585,14 +585,14 @@ class Ui_MainWindow(object):  # setting up the window
                     #clickonblack()
                     mou.position = (
                         getXandY(pointArr[0], 0), getXandY(pointArr[0], 1))  # First entry is the start position
-                    ait.move(mou.position[0] + 1, mou.position[1] + 1)  # Update "physical" mouse
+                    ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
                     for i in range(1, len(pointArr)):  # Skip first entry
                         QtCore.QCoreApplication.processEvents()
                         if "n" in pointArr[i]:
                             mou.position = (
                                 getXandY(pointArr[i], 0),
                                 getXandY(pointArr[i], 1))  # Position the mouse to the new area
-                            ait.move(mou.position[0] + 1, mou.position[1] + 1)  # Update "physical" mouse
+                            ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
 
                         if keyboard.is_pressed('q'):  # Failsafe
                             self.cmdLabel.setText("Drawing interrupted")
@@ -601,7 +601,7 @@ class Ui_MainWindow(object):  # setting up the window
                         mou.press(Button.left)
                         mou.position = (getXandY(pointArr[i], 0), getXandY(pointArr[i], 1))
 
-                        ait.move(mou.position[0] + 1, mou.position[1] + 1)
+                        ait.move(mou.position[0], mou.position[1])
 
                         mou.release(Button.left)
                         time.sleep(cannyspeed)  # this is where the speed has an effect
