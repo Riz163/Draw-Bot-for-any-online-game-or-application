@@ -1,3 +1,4 @@
+pro = 0
 while True:
     try:
         import os, sys, time, io, subprocess, random  # Base modules
@@ -6,12 +7,9 @@ while True:
         from PIL import Image
         from pynput.mouse import Button
         from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-        from PyQt5.QtGui import QKeySequence
-        from PyQt5.QtWidgets import QShortcut
         from simplification.cutil import simplify_coords
         import skimage
         import matplotlib.image as mpimg
-
         break
 
     except ImportError:
@@ -31,7 +29,7 @@ class Ui_MainWindow(object):  # setting up the window
         MainWindow.setWindowIcon(QtGui.QIcon('logo.png'))  # logo
         MainWindow.setWindowFlags(
             MainWindow.windowFlags() | QtCore.Qt.WindowStaysOnTopHint)  # make it always stay on top
-        MainWindow.setObjectName("Nuspliv8.4")
+        MainWindow.setObjectName("Nuspli v8.5")
         MainWindow.resize(379, 393)
         MainWindow.setMinimumSize(QtCore.QSize(379, 393))
         MainWindow.setMaximumSize(QtCore.QSize(379, 393))
@@ -240,7 +238,7 @@ class Ui_MainWindow(object):  # setting up the window
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Nuspliv8.4"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Nuspli v8.5"))
         self.DrawmodeLabel.setText(_translate("MainWindow", "Drawing Mode:"))
         self.DrawmodeBox.setItemText(0, _translate("MainWindow", "Canny - outlines human like"))
         self.DrawmodeBox.setItemText(1, _translate("MainWindow", "Canny - outlines just lines"))
@@ -265,7 +263,6 @@ class Ui_MainWindow(object):  # setting up the window
         self.DrawButton.setText(_translate("MainWindow", "Draw"))
         self.QuitDrawLabel.setText(_translate("MainWindow", "(Press q to quit)"))
 
-    @property
     def start_drawing(self):
         #  some functions for later -----------------------------------------------------------------------------------
         def getImage():
@@ -434,27 +431,29 @@ class Ui_MainWindow(object):  # setting up the window
                 except:
                     self.cmdLabel.setText("Enter a valid brush size !")
                     break
-                try:
-                    if self.AdaptiveCheckBox.isChecked():
-                        layers = 314159
-                    else:
-                        layers = int(self.LayersLineEdit.text())
-                except:
-                    self.cmdLabel.setText("Enter a valid number of layers !")
-                    break
+                if (self.DrawmodeBox.currentText()) == "Floyd-Steinberg-Dithering - colored":
+                    try:  # ^and only this needs layers
+                        if self.AdaptiveCheckBox.isChecked():
+                            layers = 314159
+                        else:
+                            layers = int(self.LayersLineEdit.text())
+                    except:
+                        self.cmdLabel.setText("Enter a valid number of layers !")
+                        break
             # Canny mode -----------------------------------------------------------------------------------------------
             if (self.DrawmodeBox.currentText()) == "Canny - outlines human like":
 
                 def goodify(contours):
-                    contours.sort(key=(lambda x: len(x)), reverse=True)
+                    contours.sort(key=(lambda x: len(x)), reverse=True)  # comment this line out to draw from top to btm
                     return contours
 
                 def draw(contours):
                     #clickonblack()
-
+                    pro = 0
                     slep = 0
 
                     for n, contour in enumerate(contours):
+
                         if keyboard.is_pressed('q'):
                             self.cmdLabel.setText("Drawing interrupted")
                             break
@@ -463,13 +462,24 @@ class Ui_MainWindow(object):  # setting up the window
                         a = 0
                         for x in contour[1:]:
                             ran = random.randint(1, 10)
+                            if ran == 1:
+                                QtCore.QCoreApplication.processEvents()
+                            ##############################
+                            if speeed > 750:
+                                if ran == 1 or ran == 10:
+                                    offx = random.randint(1,3)
+                                    offy = random.randint(1,3)
+                                else:
+                                    offx = 0
+                                    offy = 0
+                            ##############################
                             if speeed != 1000:
                                 slep = 1 / 500 * ran
 
                             if a == 0:
                                 mouse.release(button='left')
-                                ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                         x[0] + offset_y + int((canvas_y - preProcess.height) / 2))
+                                ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2) + 1,
+                                         x[0] + offset_y + int((canvas_y - preProcess.height) / 2) + 1)
                                 if speeed != 1000:
                                     time.sleep(1 / 100 * ran)
 
@@ -483,9 +493,8 @@ class Ui_MainWindow(object):  # setting up the window
                                                absolute=True, duration=5 / speeed)
                                     time.sleep(slep)
                                 else:  # at maximum speed --
-                                    ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                             x[0] + offset_y + int(
-                                                 (canvas_y - preProcess.height) / 2))  # change randomizers if you want
+                                    ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2) + 1 + offx,
+                                             x[0] + offset_y + int((canvas_y - preProcess.height) / 2) + 1 + offy)  # change randomizers if you want
 
                                 if keyboard.is_pressed('q'):
                                     break
@@ -500,6 +509,12 @@ class Ui_MainWindow(object):  # setting up the window
                                         ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                                  x[0] + offset_y + int((canvas_y - preProcess.height) / 2))
                                         break
+
+                            pro += 100 / (len(contour[1:])/2 * len(contours)) / 2  # this progress % is far from good
+                            prog = "%.2f" % pro                                    # because every piece of contour
+                            self.cmdLabel.setText(f"Drawing... {prog}%")           # takes a different time to draw
+                            self.cmdLabel.repaint()                                # idk how to fix it ...
+
                     mouse.release(button='left')
 
                 def process():
@@ -545,7 +560,7 @@ class Ui_MainWindow(object):  # setting up the window
 
                 try:
                     outline, ind = process()
-                    self.cmdLabel.setText("Drawing...")
+                    self.cmdLabel.setText(f"Drawing...")
                     self.cmdLabel.repaint()
 
                     draw(outline)
@@ -566,30 +581,35 @@ class Ui_MainWindow(object):  # setting up the window
                     return int(temp[select])
 
                 def drawCanny(pointArr):
+                    pro = 0
                     #clickonblack()
                     mou.position = (
                         getXandY(pointArr[0], 0), getXandY(pointArr[0], 1))  # First entry is the start position
-                    ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
-
+                    ait.move(mou.position[0] + 1, mou.position[1] + 1)  # Update "physical" mouse
                     for i in range(1, len(pointArr)):  # Skip first entry
+                        QtCore.QCoreApplication.processEvents()
                         if "n" in pointArr[i]:
                             mou.position = (
                                 getXandY(pointArr[i], 0),
                                 getXandY(pointArr[i], 1))  # Position the mouse to the new area
-                            ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
+                            ait.move(mou.position[0] + 1, mou.position[1] + 1)  # Update "physical" mouse
 
                         if keyboard.is_pressed('q'):  # Failsafe
                             self.cmdLabel.setText("Drawing interrupted")
                             time.sleep(1)
                             break
-
                         mou.press(Button.left)
                         mou.position = (getXandY(pointArr[i], 0), getXandY(pointArr[i], 1))
 
-                        ait.move(mou.position[0], mou.position[1])
+                        ait.move(mou.position[0] + 1, mou.position[1] + 1)
 
                         mou.release(Button.left)
                         time.sleep(cannyspeed)  # this is where the speed has an effect
+
+                        pro += 100 / len(pointArr)  # here the progress actually works how I want it to
+                        prog = "%.2f" % pro
+                        self.cmdLabel.setText(f"Drawing... {prog}%")
+                        self.cmdLabel.repaint()
 
                     mou.release(Button.left)
 
@@ -626,7 +646,6 @@ class Ui_MainWindow(object):  # setting up the window
             # Floyd-Steinberg
             elif (self.DrawmodeBox.currentText()) == "Floyd-Steinberg-Dithering - colored":
                 def ditheroption(image, palettedata, layers):
-
                     image_halfresized = preProcess(image, pp)
 
                     dummy = Image.new('P', (16, 16))  # creates an image to put the color palette on
@@ -643,27 +662,94 @@ class Ui_MainWindow(object):  # setting up the window
                     initCoords(pixels)
 
                     getPixels(image_dithered, pixels)
+                    ea = 0
+                    for list in pixels:
+                        ea += len(list)
                     # the data is ready now...
                     os.remove("img_dither.png")  # hide the evidence O_o
-
                     def drawColor(b, c, layers):  # this draws all the pixels of one color
-                        cc = speeed
-                        pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
-                        pyautogui.click()
-                        while c < len(pixels[b]):
-                            if keyboard.is_pressed('q'):
-                                break
-                            mouse.move(int(pixels[b][c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
-                                       # similar to canny option
-                                       int(pixels[b][c + 1] * pp + offset_y + int(
-                                           (canvas_y - preProcess.height * pp) / 2)),
-                                       # but upscaling
-                                       absolute=True, duration=0)  # with pp (brush size)
-                            mouse.click(button='left')
-                            c += layers * 2
-                            if c >= cc:  # this is where speed setting has an action
-                                time.sleep(0.05)  # every time the number of drawn pixels is too high it pauses
-                                cc += speeed
+                        global pro
+                        if layers != 1:
+                            cc = speeed
+                            pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
+                            pyautogui.click()
+                            while c < len(pixels[b]):
+                                if keyboard.is_pressed('q'):
+                                    break
+                                mouse.move(
+                                    int(pixels[b][c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                    # similar to canny option
+                                    int(pixels[b][c + 1] * pp + offset_y + int(
+                                        (canvas_y - preProcess.height * pp) / 2)),
+                                    # but upscaling
+                                    absolute=True, duration=0)  # with pp (brush size)
+                                mouse.click(button='left')
+
+                                pro += 100 / ea * 2
+                                prog = "%.2f" % pro
+
+                                c += layers * 2
+
+                                if c >= cc:  # this is where speed setting has an action
+                                    time.sleep(0.05)  # every time the number of drawn pixels is too high it pauses
+                                    QtCore.QCoreApplication.processEvents()
+                                    self.cmdLabel.setText(f"Drawing... {finalize.sth} colors are being used {prog}%")
+                                    self.cmdLabel.repaint()
+                                    cc += speeed
+                        else:
+                            cc = speeed
+                            pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
+                            pyautogui.click()
+                            while c < len(pixels[b]):
+
+                                if keyboard.is_pressed('q'):  # Failsafe
+                                    break
+                                mouse.move(int(
+                                    pixels[b][c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
+                                    int(pixels[b][c + 1] * pp + offset_y + int(
+                                        (canvas_y - preProcess.height * pp) / 2)),
+                                    absolute=True, duration=0)
+                                mouse.press(
+                                    button='left')  # here I am holding down the mouse button, instead of clicking on every pixel
+                                count = 2
+                                if c < len(pixels[
+                                               b]) - 2:  # I drag the mouse along all connected pixels to make it faster
+                                    if pixels[b][c] + 1 == pixels[b][c + 2]:
+                                        while True:
+                                            if keyboard.is_pressed('q'):  # Failsafe
+                                                break
+                                            try:
+                                                if pixels[b][c + count] + 1 == pixels[b][c + count + 2]:
+                                                    count += 2
+                                                else:
+                                                    ait.move(int(pixels[b][c + count] * pp + offset_x + int(
+                                                        (canvas_x - preProcess.width * pp) / 2)) + 1,
+                                                             int(pixels[b][c + 1] * pp + offset_y + int(
+                                                                 (canvas_y - preProcess.height * pp) / 2)) + 1)
+                                                    time.sleep((100 - (speeed / 10)) / 1000)
+                                                    break  # I don't know why this is needed 2 times, but it only worked like that...
+                                            except:
+                                                ait.move(int(pixels[b][c + count] * pp + offset_x + int(
+                                                    (canvas_x - preProcess.width * pp) / 2)) + 1,
+                                                         int(pixels[b][c + 1] * pp + offset_y + int(
+                                                             (canvas_y - preProcess.height * pp) / 2)) + 1)
+                                                time.sleep((100 - (speeed / 10)) / 1000)
+                                                break
+
+                                mouse.release(button='left')
+                                pro += 100 / ea * count
+                                prog = "%.2f" % pro
+
+                                c += count
+
+                                if c >= cc / 2:  # and also delete this if it's too slow
+                                    QtCore.QCoreApplication.processEvents()
+                                    self.cmdLabel.setText(
+                                        f"Drawing... {finalize.sth} colors are being used {prog}%")
+                                    self.cmdLabel.repaint()
+
+                                    time.sleep(1 / speeed)
+                                    cc += speeed / 2
 
                     def drawLayers():
                         z = 0
@@ -733,6 +819,8 @@ class Ui_MainWindow(object):  # setting up the window
 
                 try:
                     ditheroption(getImage(), palettedata, layers)
+                    global pro
+                    pro = 0
                     break
                 except:
                     ProcessingError()
@@ -754,8 +842,9 @@ class Ui_MainWindow(object):  # setting up the window
                                 pixelsBlack.append(j)
                     # data is ready now...
                     os.remove("img_dither.png")
-
+                    ea = len(pixelsBlack)
                     def drawblack():
+                        global pro
                         c = 2
                         cc = speeed
                         #clickonblack()
@@ -770,10 +859,18 @@ class Ui_MainWindow(object):  # setting up the window
                                 int(pixelsBlack[c + 1] * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
                                 absolute=True, duration=0)
                             mouse.click(button='left')
+
+                            pro += 100 / ea * 2
+                            prog = "%.2f" % pro
                             c += 2
-                            if c == cc:
-                                time.sleep(0.05)
+
+                            if c >= cc:  # this is where speed setting has an action
+                                time.sleep(0.05)  # every time the number of drawn pixels is too high it pauses
+                                QtCore.QCoreApplication.processEvents()
+                                self.cmdLabel.setText(f"Drawing... {prog}%")
+                                self.cmdLabel.repaint()
                                 cc += speeed
+                        pro = 0
 
                     self.cmdLabel.setText("Drawing...")
                     self.cmdLabel.repaint()
@@ -808,8 +905,12 @@ class Ui_MainWindow(object):  # setting up the window
                     getPixels(image_quant, pixels)
                     # the data is ready now...
                     os.remove("img_quant.png")
+                    ea = 0
+                    for list in pixels:
+                        ea += len(list)
 
                     def drawQuantize1(b, c):  # draw one color
+                        global pro
                         cc = speeed
                         pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
                         pyautogui.click()
@@ -833,32 +934,33 @@ class Ui_MainWindow(object):  # setting up the window
                                             if pixels[b][c + count] + 1 == pixels[b][c + count + 2]:
                                                 count += 2
                                             else:
-                                                mouse.move(int(pixels[b][c + count] * pp + offset_x + int(
-                                                    (canvas_x - preProcess.width * pp) / 2)),
+                                                ait.move(int(pixels[b][c + count] * pp + offset_x + int(
+                                                    (canvas_x - preProcess.width * pp) / 2)) + 1,
                                                            int(pixels[b][c + 1] * pp + offset_y + int(
-                                                               (canvas_y - preProcess.height * pp) / 2)),
-                                                           absolute=True, duration=0)
-                                                if count >= 4:
-                                                    time.sleep(0.05)
+                                                               (canvas_y - preProcess.height * pp) / 2)) + 1)
+                                                time.sleep((100 - (speeed/10))/1000)
                                                 break  # I don't know why this is needed 2 times, but it only worked like that...
                                         except:
-                                            mouse.move(int(pixels[b][c + count] * pp + offset_x + int(
-                                                (canvas_x - preProcess.width * pp) / 2)),
+                                            ait.move(int(pixels[b][c + count] * pp + offset_x + int(
+                                                (canvas_x - preProcess.width * pp) / 2)) + 1,
                                                        int(pixels[b][c + 1] * pp + offset_y + int(
-                                                           (canvas_y - preProcess.height * pp) / 2)),
-                                                       absolute=True, duration=0)
-                                            if count >= 4:
-                                                time.sleep(
-                                                    0.05)  # you can change this if it leaves too many gaps or is too slow
+                                                           (canvas_y - preProcess.height * pp) / 2)) + 1)
+                                            time.sleep((100 - (speeed / 10))/1000)
                                             break
 
                             mouse.release(button='left')
+                            pro += 100 / ea * count
+                            prog = "%.2f" % pro
 
                             c += count
 
-                            if c >= cc:  # and also delete this if it's too slow
-                                time.sleep(int(1 / speeed))
-                                cc += speeed
+                            if c >= cc/2:  # and also delete this if it's too slow
+                                QtCore.QCoreApplication.processEvents()
+                                self.cmdLabel.setText(f"Drawing... {finalize.sth} colors are being used {prog}%")
+                                self.cmdLabel.repaint()
+
+                                time.sleep(1 / speeed)
+                                cc += speeed/2
 
                     def drawQuantize():
                         z = 0
@@ -886,6 +988,8 @@ class Ui_MainWindow(object):  # setting up the window
                     self.cmdLabel.setText(f"Drawing... {finalize.sth} colors are being used")
                     self.cmdLabel.repaint()
                     drawQuantize()
+                    global pro
+                    pro = 0
                     self.cmdLabel.setText("Finished !")
 
                 try:
@@ -913,6 +1017,7 @@ class Ui_MainWindow(object):  # setting up the window
                     x, y = image_quant.size
 
                     def drawQuantLines():
+                        global pro
                         for j in range(y):
                             i = 0
                             if keyboard.is_pressed('q'):  # Failsafe
@@ -960,12 +1065,12 @@ class Ui_MainWindow(object):  # setting up the window
                                             if keyboard.is_pressed('q'):  # Failsafe
                                                 break
 
-                                            mouse.move(
-                                                int(i * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
-                                                int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)),
-                                                absolute=True, duration=0)
-                                            time.sleep((1000 - speeed) / 500)
+                                            ait.move(
+                                                int(i * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2) + 1),
+                                                int(j * pp + offset_y + int((canvas_y - preProcess.height * pp) / 2)) + 1)
+                                            time.sleep((100 - (speeed / 10))/1000)
                                             mouse.release(button='left')
+                                            pro += 200 / ((x * y) * (i - ii) * 2)
                                         else:
                                             if keyboard.is_pressed('q'):  # Failsafe
                                                 break
@@ -979,12 +1084,20 @@ class Ui_MainWindow(object):  # setting up the window
                                                            absolute=True, duration=0)
                                                 mouse.click(button='left')
                                                 ii += 1
+                                                pro += 400 / (x * y)
+                                        prog = "%.2f" % pro
+
                                         break
                                     else:
                                         a += 3
                                         f += 2
                                 i += 1
+                            QtCore.QCoreApplication.processEvents()
+                            self.cmdLabel.setText(f"Drawing... {prog}%")
+                            self.cmdLabel.repaint()
+                        mouse.release(button='left')
                         os.remove("img_quant.png")
+                        pro = 0
 
                     self.cmdLabel.setText("Drawing...")
                     self.cmdLabel.repaint()
@@ -999,19 +1112,84 @@ class Ui_MainWindow(object):  # setting up the window
             break  # while loop
 
     def pressedDraw(self):  # when draw button is pressed (or enter)
-        self.start_drawing
+        self.start_drawing()
 
     def pressedCalCanvas(self):  # pyqt5 seems to freeze on basically every while loop that's why I use another script
-        os.system("start cmd /K")
-        time.sleep(1)
-        keyboard.write("python CalibrateCanvas.py")
-        keyboard.send('enter')
+        self.cmdLabel.setText("Calibration started\nopen the game window and press s to start")
+        while True:
+            QtCore.QCoreApplication.processEvents()
+            if keyboard.is_pressed('s'):
+                canvas = open("settings\canvas_settings.txt", "w")
+                self.cmdLabel.setText("Click on the top left corner of your drawing location !")
+                while True:
+                    QtCore.QCoreApplication.processEvents()
+                    if mouse.is_pressed(button='left'):
+                        pos = pyautogui.position()
+                        canvas.write(f"{pos[0]}\n")
+                        canvas.write(f"{pos[1]}\n")
+                        self.cmdLabel.setText(self.cmdLabel.text() + f"\nclicked at {pos[0]}, {pos[1]}")
+                        time.sleep(0.2)
+                        break
+
+                self.cmdLabel.setText(
+                    self.cmdLabel.text() + "\nClick on the bottom right corner of your drawing location")
+                while True:
+                    QtCore.QCoreApplication.processEvents()
+                    if mouse.is_pressed(button='left'):
+                        pos = pyautogui.position()
+                        canvas.write(f"{pos[0]}\n")
+                        canvas.write(f"{pos[1]}\n")
+                        self.cmdLabel.setText(self.cmdLabel.text() + f"\nclicked at {pos[0]}, {pos[1]}")
+                        time.sleep(0.2)
+                        break
+                self.cmdLabel.setText(self.cmdLabel.text() + "\nFinished !")
+                canvas.close()
+                break
+            time.sleep(0.05)
 
     def pressedCalColors(self):
-        os.system("start cmd /K")
-        time.sleep(1)
-        keyboard.write("python CalibrateColors.py")
-        keyboard.send('enter')
+        self.cmdLabel.setText("Calibration started\nopen the game window and press s to start")
+        while True:
+            QtCore.QCoreApplication.processEvents()
+            if keyboard.is_pressed('s'):
+                self.cmdLabel.setText("Click on every color you want to use !\n important - dont click on white !")
+                # (if you do nothing bad happens and if the background isn't white you should)
+                self.cmdLabel.setText(self.cmdLabel.text() + "\nWhen you are finished press f to finish calibrating")
+
+                screen = pyscreeze.screenshot()  # screenshot to get the color on click
+                palette = open("settings\colors_palette.txt", "w")  # w is write mode
+                coordinates = open("settings\colors_coordinates.txt", "w")
+                while True:
+                    QtCore.QCoreApplication.processEvents()
+                    global pro
+                    if mouse.is_pressed(button='left'):  # on click
+
+                        pos = pyautogui.position()  # gets the position to know where to click to select the color
+                        coordinates.write(f"{pos[0]}\n")
+                        coordinates.write(f"{pos[1]}\n")
+
+                        rr, gg, bb = screen.getpixel(
+                            (pos[0], pos[1]))  # gets the color of that position to know what
+                        # to use for dithering
+                        palette.write(f"{rr}\n")
+                        palette.write(f"{gg}\n")
+                        palette.write(f"{bb}\n")
+                        pro += 1
+                        time.sleep(0.2)  # otherwise it's too fast and stores stuff twice or something
+                        if pro > 4:
+                            self.cmdLabel.setText(f"clicked at {pos[0]}, {pos[1]} - color {rr}, {bb}, {gg}")
+                            pro = -3
+                        else:
+                            self.cmdLabel.setText(self.cmdLabel.text() + f"\nclicked at {pos[0]}, {pos[1]} - color {rr}, {bb}, {gg}")
+
+                    elif keyboard.is_pressed('f'):
+                        break
+                self.cmdLabel.setText(self.cmdLabel.text() + "\nFinished !")
+                palette.close()
+                coordinates.close()
+                pro = 0
+                break
+            time.sleep(0.05)
 
 
 if __name__ == "__main__":
