@@ -447,15 +447,15 @@ class Ui_MainWindow(object):  # setting up the window
                     contours.sort(key=(lambda x: len(x)), reverse=True)  # comment this line out to draw from top to btm
                     return contours
 
-                def draw(contours):
+                def draw(contours, avg_len):
                     #clickonblack()
                     pro = 0
                     slep = 0
-
+                    xpre = 0
+                    ypre = 0
                     for n, contour in enumerate(contours):
 
                         if keyboard.is_pressed('q'):
-                            self.cmdLabel.setText("Drawing interrupted")
                             break
                         contour = simplify_coords(contour, 2.0)
 
@@ -465,8 +465,8 @@ class Ui_MainWindow(object):  # setting up the window
                             if ran == 1:
                                 QtCore.QCoreApplication.processEvents()
                             ##############################
-                            if speeed > 750:
-                                if ran == 1 or ran == 10:
+                            if speeed > 750:  # add offx and offy to the offset in the mouse moving functions
+                                if ran == 1 or ran == 10:  # to make small mistakes
                                     offx = random.randint(1,3)
                                     offy = random.randint(1,3)
                                 else:
@@ -478,8 +478,8 @@ class Ui_MainWindow(object):  # setting up the window
 
                             if a == 0:
                                 mouse.release(button='left')
-                                ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2) + 1,
-                                         x[0] + offset_y + int((canvas_y - preProcess.height) / 2) + 1)
+                                ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                         x[0] + offset_y + int((canvas_y - preProcess.height) / 2))
                                 if speeed != 1000:
                                     time.sleep(1 / 100 * ran)
 
@@ -487,14 +487,27 @@ class Ui_MainWindow(object):  # setting up the window
                             else:
                                 if not mouse.is_pressed(button='left'):
                                     mouse.press(button='left')
-                                if speeed != 1000:
+
+                                xnow = int(x[1])
+                                ynow = int(x[0])
+
+                                difference = abs(xpre-xnow + ypre-ynow)
+                                if speeed != 1000 and difference >= avg_len / 2:  # otherwise short lines take too long
                                     mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                                x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
                                                absolute=True, duration=5 / speeed)
                                     time.sleep(slep)
                                 else:  # at maximum speed --
-                                    ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2) + 1 + offx,
-                                             x[0] + offset_y + int((canvas_y - preProcess.height) / 2) + 1 + offy)  # change randomizers if you want
+                                    if speeed <= 980:
+                                        mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                                   x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
+                                                   absolute=True, duration=1 / speeed)  # <--change dur to 5 if too fast
+                                    else:
+                                        ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                                 x[0] + offset_y + int((canvas_y - preProcess.height) / 2))  # change randomizers if you want
+
+                                xpre = int(x[1])
+                                ypre = int(x[0])
 
                                 if keyboard.is_pressed('q'):
                                     break
@@ -555,15 +568,37 @@ class Ui_MainWindow(object):  # setting up the window
                     best_ind = lengths.index(max(lengths))
 
                     best_contour = contours[best_ind]
+                    diffs = 0
+                    cont = 0
+                    xpre = 0
+                    ypre = 0
 
-                    return best_contour, best_ind
+                    for n, contour in enumerate(best_contour):
+                        contour = simplify_coords(contour, 2.0)
+                        a = 0
+                        for x in contour[1:]:
+                            if a == 0:
+                                a = 1
+                            else:
+                                xnow = int(x[1])
+                                ynow = int(x[0])
+
+                                difference = abs(xpre-xnow + ypre-ynow)
+                                diffs += difference
+                                cont += 1
+
+                                xpre = int(x[1])
+                                ypre = int(x[0])
+
+                    avg_len = int(diffs / cont)
+                    return best_contour, best_ind, avg_len
 
                 try:
-                    outline, ind = process()
+                    outline, ind, avg = process()
                     self.cmdLabel.setText(f"Drawing...")
                     self.cmdLabel.repaint()
 
-                    draw(outline)
+                    draw(outline, avg)
                     self.cmdLabel.setText("Finished !")
                 except:
                     ProcessingError()
@@ -595,8 +630,6 @@ class Ui_MainWindow(object):  # setting up the window
                             ait.move(mou.position[0], mou.position[1])  # Update "physical" mouse
 
                         if keyboard.is_pressed('q'):  # Failsafe
-                            self.cmdLabel.setText("Drawing interrupted")
-                            time.sleep(1)
                             break
                         mou.press(Button.left)
                         mou.position = (getXandY(pointArr[i], 0), getXandY(pointArr[i], 1))
@@ -700,6 +733,7 @@ class Ui_MainWindow(object):  # setting up the window
                             cc = speeed
                             pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
                             pyautogui.click()
+                            co = 0
                             while c < len(pixels[b]):
 
                                 if keyboard.is_pressed('q'):  # Failsafe
@@ -726,14 +760,12 @@ class Ui_MainWindow(object):  # setting up the window
                                                         (canvas_x - preProcess.width * pp) / 2)) + 1,
                                                              int(pixels[b][c + 1] * pp + offset_y + int(
                                                                  (canvas_y - preProcess.height * pp) / 2)) + 1)
-                                                    time.sleep((100 - (speeed / 10)) / 1000)
                                                     break  # I don't know why this is needed 2 times, but it only worked like that...
                                             except:
                                                 ait.move(int(pixels[b][c + count] * pp + offset_x + int(
                                                     (canvas_x - preProcess.width * pp) / 2)) + 1,
                                                          int(pixels[b][c + 1] * pp + offset_y + int(
                                                              (canvas_y - preProcess.height * pp) / 2)) + 1)
-                                                time.sleep((100 - (speeed / 10)) / 1000)
                                                 break
 
                                 mouse.release(button='left')
@@ -741,15 +773,17 @@ class Ui_MainWindow(object):  # setting up the window
                                 prog = "%.2f" % pro
 
                                 c += count
+                                co += 2
 
-                                if c >= cc / 2:  # and also delete this if it's too slow
+                                if co >= cc / 2:  # and also delete this if it's too slow
                                     QtCore.QCoreApplication.processEvents()
                                     self.cmdLabel.setText(
                                         f"Drawing... {finalize.sth} colors are being used {prog}%")
                                     self.cmdLabel.repaint()
-
-                                    time.sleep(1 / speeed)
                                     cc += speeed / 2
+                                    time.sleep(1 / speeed)
+                            if speeed >= 250 and pixels[-1] != pixels[b]:
+                                time.sleep((len(pixels[b]) / 5000))
 
                     def drawLayers():
                         z = 0
@@ -757,10 +791,10 @@ class Ui_MainWindow(object):  # setting up the window
                         while z < layers:
                             e = 0
                             b = 0
+                            if keyboard.is_pressed('q'):  # Failsafe
+                                break
                             while e < int((len(palettedata) - 3) / 3):
                                 if keyboard.is_pressed('q'):  # Failsafe
-                                    self.cmdLabel.setText("Drawing interrupted")
-                                    time.sleep(1)
                                     break
                                 try:
                                     if len(pixels[b]) > 2:
@@ -780,8 +814,6 @@ class Ui_MainWindow(object):  # setting up the window
                         bb = []
                         while e < int((len(palettedata) - 3) / 3):
                             if keyboard.is_pressed('q'):  # Failsafe
-                                self.cmdLabel.setText("Drawing interrupted")
-                                time.sleep(1)
                                 break
                             try:
                                 if e > int(finalize.sth * 3 / 4):  # <-- the last number determines which colors should
@@ -801,6 +833,8 @@ class Ui_MainWindow(object):  # setting up the window
                         while True:
                             try:
                                 while True:
+                                    if keyboard.is_pressed('q'):  # Failsafe
+                                        break
                                     drawColor(bb[e], c, layers)
                                     e += 1
                             except:
@@ -851,8 +885,6 @@ class Ui_MainWindow(object):  # setting up the window
 
                         while c < len(pixelsBlack):
                             if keyboard.is_pressed('q'):
-                                self.cmdLabel.setText("Drawing interrupted")
-                                time.sleep(1)
                                 break
                             mouse.move(
                                 int(pixelsBlack[c] * pp + offset_x + int((canvas_x - preProcess.width * pp) / 2)),
@@ -970,8 +1002,6 @@ class Ui_MainWindow(object):  # setting up the window
                             b = 0
                             while e < int((len(palettedata) - 3) / 3):
                                 if keyboard.is_pressed('q'):  # Failsafe
-                                    self.cmdLabel.setText("Drawing interrupted")
-                                    time.sleep(1)
                                     break
                                 try:
                                     if len(pixels[b]) > 2:
@@ -1021,8 +1051,6 @@ class Ui_MainWindow(object):  # setting up the window
                         for j in range(y):
                             i = 0
                             if keyboard.is_pressed('q'):  # Failsafe
-                                self.cmdLabel.setText("Drawing interrupted")
-                                time.sleep(1)
                                 break
 
                             while i < x:  # for every pixel
