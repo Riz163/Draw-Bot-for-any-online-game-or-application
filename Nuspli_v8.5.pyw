@@ -492,19 +492,30 @@ class Ui_MainWindow(object):  # setting up the window
                                 ynow = int(x[0])
 
                                 difference = abs(xpre-xnow + ypre-ynow)
-                                if speeed != 1000 and difference >= avg_len / 2:  # otherwise short lines take too long
-                                    mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
-                                               x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
-                                               absolute=True, duration=2.5 / speeed)
-                                    time.sleep(slep)
-                                else:  # at maximum speed --
+                                if speeed != 1000 and difference <= avg_len / 2:  # otherwise short lines take too long
                                     if speeed <= 980:
                                         mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                                    x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
-                                                   absolute=True, duration=1 / speeed)  # <--change dur to 5 if too fast
+                                                   absolute=True, duration=2.5 / speeed)
                                     else:
                                         ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                                  x[0] + offset_y + int((canvas_y - preProcess.height) / 2))  # change randomizers if you want
+
+                                elif speeed != 1000 and difference >= avg_len * 2:
+                                    mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                               x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
+                                               absolute=True, duration=7.5 / speeed)
+                                    time.sleep(slep)
+                                else:  # at normal speed --
+
+                                    if speeed <= 980:
+                                        mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                                   x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
+                                                   absolute=True, duration=5 / speeed)
+                                        time.sleep(slep)
+                                    else:
+                                        ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
+                                                 x[0] + offset_y + int((canvas_y - preProcess.height) / 2))
 
                                 xpre = int(x[1])
                                 ypre = int(x[0])
