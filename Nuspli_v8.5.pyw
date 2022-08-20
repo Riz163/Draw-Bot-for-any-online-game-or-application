@@ -496,7 +496,7 @@ class Ui_MainWindow(object):  # setting up the window
                                     if speeed <= 980:
                                         mouse.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                                    x[0] + offset_y + int((canvas_y - preProcess.height) / 2),
-                                                   absolute=True, duration=2.5 / speeed)
+                                                   absolute=True, duration=1 / speeed)
                                     else:
                                         ait.move(x[1] + offset_x + int((canvas_x - preProcess.width) / 2),
                                                  x[0] + offset_y + int((canvas_y - preProcess.height) / 2))  # change randomizers if you want
