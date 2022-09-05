@@ -1,7 +1,7 @@
 pro = 0
 while True:
     try:
-        import os, sys, time, io, subprocess, random  # Base modules
+        import os, sys, time, io, random  # Base modules
         import ait, cv2, numpy, pyautogui, requests, keyboard, mouse, pyscreeze  # Dependencies
         import pynput.mouse as ms
         from PIL import Image
