@@ -1227,7 +1227,7 @@ class Ui_MainWindow(object):  # setting up the window
         while True:
             QtCore.QCoreApplication.processEvents()
             if keyboard.is_pressed('s'):
-                self.cmdLabel.setText("Click on every color you want to use !\n important - dont click on white !")
+                self.cmdLabel.setText("Click on every color you want to use !\nimportant - dont click on white !")
                 # (if you do nothing bad happens and if the background isn't white you should)
                 self.cmdLabel.setText(self.cmdLabel.text() + "\nWhen you are finished press f to finish calibrating")
 
