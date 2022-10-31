@@ -22,6 +22,7 @@ while True:
         for i in dep:
             os.system(f"cmd /c pip install {i}")
 
+pyautogui.PAUSE = 0
 
 class Ui_MainWindow(object):  # setting up the window
 
@@ -393,8 +394,7 @@ class Ui_MainWindow(object):  # setting up the window
                     break
                 w += 2
                 t += 3
-            pyautogui.moveTo(Black[0], Black[1])  # click on black
-            pyautogui.click()
+            pyautogui.click(Black[0], Black[1])  # click on black
 
         #  main function------------------------------------------------------------------------------------------------
         while True:
@@ -752,8 +752,7 @@ class Ui_MainWindow(object):  # setting up the window
                         global pro
                         if layers != 1:
                             cc = speeed
-                            pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
-                            pyautogui.click()
+                            pyautogui.click(pixels[b][0], pixels[b][1])  # selects the right color first
                             while c < len(pixels[b]):
                                 if keyboard.is_pressed('q'):
                                     break
@@ -779,8 +778,7 @@ class Ui_MainWindow(object):  # setting up the window
                                     cc += speeed
                         else:
                             cc = speeed
-                            pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
-                            pyautogui.click()
+                            pyautogui.click(pixels[b][0], pixels[b][1])  # selects the right color first
                             co = 0
                             while c < len(pixels[b]):
 
@@ -992,8 +990,7 @@ class Ui_MainWindow(object):  # setting up the window
                     def drawQuantize1(b, c):  # draw one color
                         global pro
                         cc = speeed
-                        pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
-                        pyautogui.click()
+                        pyautogui.click(pixels[b][0], pixels[b][1])  # selects the right color first
                         while c < len(pixels[b]):
 
                             if keyboard.is_pressed('q'):  # Failsafe
@@ -1220,7 +1217,7 @@ class Ui_MainWindow(object):  # setting up the window
                 self.cmdLabel.setText(self.cmdLabel.text() + "\nFinished !")
                 canvas.close()
                 break
-            time.sleep(0.05)
+            time.sleep(0.1)
 
     def pressedCalColors(self):
         self.cmdLabel.setText("Calibration started\nopen the game window and press s to start")
@@ -1259,12 +1256,13 @@ class Ui_MainWindow(object):  # setting up the window
 
                     elif keyboard.is_pressed('f'):
                         break
+                    time.sleep(0.05)
                 self.cmdLabel.setText(self.cmdLabel.text() + "\nFinished !")
                 palette.close()
                 coordinates.close()
                 pro = 0
                 break
-            time.sleep(0.05)
+            time.sleep(0.1)
 
 # ------------------------------------------------------------keyboard mode--------------------------------------------
 s = 0.03  # speed
