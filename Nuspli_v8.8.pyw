@@ -1111,7 +1111,7 @@ class Ui_MainWindow(object):  # setting up the window
                     dummy = Image.new('P', (16, 16))
                     dummy.putpalette(palettedata)
                     image_quantized = image_halfresized.convert("RGB").quantize(palette=dummy,
-                                                                                dither=True)  # no dithering this time
+                                                                                dither=False)  # no dithering this time
                     image_quantized.save("img_quant.png")
 
                     coordinates = []
