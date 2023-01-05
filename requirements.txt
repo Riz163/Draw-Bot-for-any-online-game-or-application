@@ -1,0 +1,14 @@
+pynput
+autoit
+numpy
+opencv-python
+pyautogui
+pillow
+requests
+keyboard
+mouse
+pyscreeze
+PyQt5
+simplification
+scikit-image
+matplotlib

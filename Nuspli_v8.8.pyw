@@ -1,28 +1,21 @@
 pro = 0
 version = "8.8"
-while True:
-    try:
-        import os, sys, time, io, random # Base modules
-        from re import search
-        import ait, cv2, numpy, pyautogui, requests, keyboard, mouse, pyscreeze  # Dependencies
-        import pynput.mouse as ms
-        from PIL import Image
-        from pynput.mouse import Button
-        from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-        from simplification.cutil import simplify_coords
-        import skimage
-        from multiprocessing import Process
-        import matplotlib.image as mpimg
-        break
 
-    except ImportError:
-        dep = ["pynput", "autoit", "numpy", "opencv-python", "pyautogui",
-               "pillow", "requests", "keyboard", "mouse", "pyscreeze", "PyQt5",
-               "simplification", "scikit-image", "matplotlib"]  # For every dep added put it in this list
-        print("Import error\nDownloading dependencies...")
-        time.sleep(3)
-        for i in dep:
-            os.system(f"cmd /c pip install {i}")
+try:
+    import os, sys, time, io, random # Base modules
+    from re import search
+    import ait, cv2, numpy, pyautogui, requests, keyboard, mouse, pyscreeze  # Dependencies
+    import pynput.mouse as ms
+    from PIL import Image
+    from pynput.mouse import Button
+    from PyQt5 import QtCore, QtGui, QtWidgets, Qt
+    from simplification.cutil import simplify_coords
+    import skimage
+    from multiprocessing import Process
+    import matplotlib.image as mpimg
+
+except ImportError:
+    print("please install all necessary dependencies first!\n--> pip install -r requirements.txt\nIf this error stays persistent, please message Kolmus#4516")
 
 class Ui_MainWindow(object):  # setting up the window
 
