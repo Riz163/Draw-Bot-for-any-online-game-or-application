@@ -18,8 +18,7 @@ features:
 
 * keyboard mode - run the file and hit f9 to enter and exit keyboard mode, for now only A ... Z and whitespace are supported
 
-run it by simply double clicking the Nuspli file and on first run it should install all the requirements on its own\
-a few cmd windows will pop up, just give it some time to install everything. (make sure to upgrade pip if it stays in a loop)\
+before running, install the requirements using pip\
 make sure to calibrate it before drawing by pressing Calibrate\
 if any emergencies occour, press "q" to trigger the failsafe
 
