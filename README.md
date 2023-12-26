@@ -26,7 +26,7 @@ I belive this is the fastest and most versitile one out there and it's also very
 
 I also recommend using clipart images for faster drawing times (not necessary for dithering)
 
-Examples:
+Examples (some outdated):
 
 ![skribbl-Practise-by-me ](https://user-images.githubusercontent.com/108233076/179418688-babc824a-0f97-42b0-80a1-37c2b8d6a241.gif)
 ![skribbl-Practise-by-me  (1)](https://user-images.githubusercontent.com/108233076/179418846-23bc80ea-5489-4792-a794-7a7429d4ec71.gif)
