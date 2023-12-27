@@ -38,7 +38,7 @@ def drawHuman(contours, avg_len, win, canvas_x, canvas_y, offset_x, offset_y, sp
     xpre = 0
     ypre = 0
 
-    for contour in contours:
+    for n, contour in enumerate(contours):
 
         if keyboard.is_pressed('q'):
             break
@@ -100,11 +100,12 @@ def drawHuman(contours, avg_len, win, canvas_x, canvas_y, offset_x, offset_y, sp
                         ait.move(x[1] + offset_x + int((canvas_x - process.preProcess.width) / 2),
                                     x[0] + offset_y + int((canvas_y - process.preProcess.height) / 2))
                         break
-
-            pro += 100 / (len(contour[1:])/2 * len(contours)) / 2 # this progress % is far from good
-            prog = "%.2f" % pro
-            win.cmdLabel.setText(f"Drawing... {prog}%")
-            win.cmdLabel.repaint()
+            
+            if n % 5 == 0:
+                pro += 100 / (len(contour[1:])/2 * len(contours)) * 2.5 # this progress % is far from good
+                prog = "%.2f" % pro
+                win.cmdLabel.setText(f"Drawing... {prog}%")
+                win.cmdLabel.repaint()
 
     mouse.release(button='left')
 
@@ -197,6 +198,7 @@ def drawLines(win, canvas_x, canvas_y, offset_x, offset_y, sleep):
 
     mou.position = (getXandY(pointArr[0], 0), getXandY(pointArr[0], 1))  # First entry is the start position
     ait.move(mou.position[0], mou.position[1])
+
     for i in range(1, len(pointArr)):  # Skip first entry
         QtCore.QCoreApplication.processEvents()
         if "n" in pointArr[i]:
@@ -213,11 +215,14 @@ def drawLines(win, canvas_x, canvas_y, offset_x, offset_y, sleep):
         ait.move(mou.position[0], mou.position[1])
 
         mou.release(Button.left)
-        time.sleep(sleep)  # this is where the speed has an effect
 
-        pro += 100 / len(pointArr)  # here the progress actually works how I want it to
-        prog = "%.2f" % pro
-        win.cmdLabel.setText(f"Drawing... {prog}%")
-        win.cmdLabel.repaint()
+        if sleep > 0:
+            time.sleep(sleep)  # this is where the speed has an effect
+
+        if i % 10 == 0:
+            pro += (100 / len(pointArr)) * 10
+            prog = "%.2f" % pro
+            win.cmdLabel.setText(f"Drawing... {prog}%")
+            win.cmdLabel.repaint()
 
     mou.release(Button.left)

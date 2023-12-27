@@ -8,7 +8,7 @@ try:
     import draw
 
 except ImportError:
-    print("please install all necessary dependencies first!\n--> pip install -r requirements.txt\nIf this error stays persistent, please message Kolmus#4516")
+    print("please install all necessary dependencies first!\n--> pip install -r requirements.txt\nIf this error stays persistent, message me on discord: kolmus")
     exit()
     
 class Ui_MainWindow(object):  # setting up the window
@@ -207,9 +207,6 @@ class Ui_MainWindow(object):  # setting up the window
         self.QuitDrawLabel = QtWidgets.QLabel(self.centralwidget)
         self.QuitDrawLabel.setGeometry(QtCore.QRect(290, 250, 81, 21))
         self.QuitDrawLabel.setObjectName("QuitDrawLabel")
-        self.KeyboardModeLabel = QtWidgets.QLabel(self.centralwidget)
-        self.KeyboardModeLabel.setGeometry(QtCore.QRect(290, 170, 81, 42))
-        self.KeyboardModeLabel.setObjectName("KeyboardModeLabel")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 379, 21))
@@ -221,7 +218,6 @@ class Ui_MainWindow(object):  # setting up the window
 
         #  connecting the buttons to functions
         self.DrawButton.clicked.connect(self.pressedDraw)
-
         self.CalibrateCanvasButton.clicked.connect(self.pressedCalCanvas)
         self.CalibrateColorsButton.clicked.connect(self.pressedCalColors)
 
@@ -254,9 +250,8 @@ class Ui_MainWindow(object):  # setting up the window
         self.BrushSizeLabel.setText(_translate("MainWindow", "1 - 10"))
         self.DrawButton.setText(_translate("MainWindow", "Draw"))
         self.QuitDrawLabel.setText(_translate("MainWindow", "Press q to quit"))
-        self.KeyboardModeLabel.setText(_translate("MainWindow", "Press F9 to\nstart and stop\nkeyboard mode"))
 
-    def pressedDraw(self):  # when draw button is pressed (or enter)
+    def pressedDraw(self):
         print("[DEBUG] draw button pressed")
         draw.draw(self)
 

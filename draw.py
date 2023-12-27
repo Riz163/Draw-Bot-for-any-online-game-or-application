@@ -33,7 +33,7 @@ def draw(win):
 
         # then check all gui settings
         try:
-            cannyspeed = (100 - int(win.PercentLineEdit.text())) / 100
+            cannyspeed = int((100 - int(win.PercentLineEdit.text())) / 100)
             speeed = 10 * int(win.PercentLineEdit.text())
             print(f"[DEBUG] speed set to {speeed} (canny: {cannyspeed})")
         except:

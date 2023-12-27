@@ -80,7 +80,7 @@ def preProcess(image, pp, x, y):
 
     print(f"[DEBUG] image resized to {width}x{height}")
 
-    return im  # the finished image
+    return im
 
 def initPixels(palettedata):
     pixels = []
@@ -130,14 +130,14 @@ def getPixels(image, pixels, palettedata):
     print(f"[DEBUG] loaded coordinates for every pixel of {len(pixels)} colors")
 
 def finalize(pixels, win):
-    pixels.sort(key=len)  # here it sorts all color entries in pixels by their length to draw the ones with fewer colors
-    # first, as they are likely to be the outlines so that it's easier to recognize the drawing fast
+    pixels.sort(key=len)
 
-    sth = 0
-    for ol in pixels:  # getting colors that are actually going to be used
+    num = 0
+    for ol in pixels:  # getting the number colors that are actually going to be used
         if len(ol) > 2:
-            sth += 1
-    finalize.sth = sth
+            num += 1
+
+    finalize.colornum = num
     print(f"[DEBUG] sorted pixels")
-    win.cmdLabel.setText(f"Drawing... {sth} colors are being used")
+    win.cmdLabel.setText(f"Drawing... {num} colors are being used")
     win.cmdLabel.repaint()

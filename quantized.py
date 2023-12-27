@@ -11,7 +11,7 @@ def drawQuantized(image, palettedata, win, speed, pp, offset_x, offset_y, canvas
 
     dummy = Image.new('P', (16, 16))
     dummy.putpalette(palettedata)
-    image_quantized = image_halfresized.convert("RGB").quantize(palette=dummy,dither=False)  # no dithering this time
+    image_quantized = image_halfresized.convert("RGB").quantize(palette=dummy,dither=False)
     image_quantized.save("img_quant.png")
 
     print(f"[DEBUG] image quantized")
@@ -23,15 +23,16 @@ def drawQuantized(image, palettedata, win, speed, pp, offset_x, offset_y, canvas
     image_quant = Image.open("img_quant.png").convert('RGB')
 
     process.getPixels(image_quant, pixels, palettedata)
-    # the data is ready now...
+
     os.remove("img_quant.png")
+
     ea = 0
     for list in pixels:
         ea += len(list)
 
-    def drawQuantize1(b, c):  # draw one color
-        pro = 0
+    def drawQuantizedColor(b, c, pro):  # draw one color
         cc = speed
+        clicks = 0
         pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
         pyautogui.click()
         while c < len(pixels[b]):
@@ -42,55 +43,45 @@ def drawQuantized(image, palettedata, win, speed, pp, offset_x, offset_y, canvas
                         int(pixels[b][c + 1] * pp + offset_y + int(
                             (canvas_y - process.preProcess.height * pp) / 2)),
                         absolute=True, duration=0)
-            mouse.press(
-                button='left')  # here I am holding down the mouse button, instead of clicking on every pixel
-            count = 2
-            if c < len(pixels[b]) - 2:  # I drag the mouse along all connected pixels to make it faster
-                if pixels[b][c] + 1 == pixels[b][c + 2]:
-                    while True:
-                        if keyboard.is_pressed('q'):  # Failsafe
-                            break
-                        try:
-                            if pixels[b][c + count] + 1 == pixels[b][c + count + 2]:
-                                count += 2
-                            else:
-                                ait.move(int(pixels[b][c + count] * pp + offset_x + int(
-                                    (canvas_x - process.preProcess.width * pp) / 2)) + 1,
-                                            int(pixels[b][c + 1] * pp + offset_y + int(
-                                                (canvas_y - process.preProcess.height * pp) / 2)) + 1)
-                                time.sleep((100 - (speed/10))/1000)
-                                break  # I don't know why this is needed 2 times, but it only worked like that...
-                        except:
-                            ait.move(int(pixels[b][c + count] * pp + offset_x + int(
-                                (canvas_x - process.preProcess.width * pp) / 2)) + 1,
-                                        int(pixels[b][c + 1] * pp + offset_y + int(
-                                            (canvas_y - process.preProcess.height * pp) / 2)) + 1)
-                            time.sleep((100 - (speed / 10))/1000)
-                            break
+            mouse.press(button='left')  # hold down mouse
+            count = 1
+            # count how many pixels of the same color are next to each other
+            while (c + 2*count) < len(pixels[b]) and pixels[b][c] + count == pixels[b][c + 2*count] and pixels[b][c+1] == pixels[b][c + 2*count + 1]:
+                count += 1
+
+            if count > 1:
+            # skip over the connected pixels
+                ait.move(int(pixels[b][c + 2*count - 2] * pp + offset_x + int(
+                    (canvas_x - process.preProcess.width * pp) / 2)) + 1,
+                            int(pixels[b][c + 2*count - 1] * pp + offset_y + int(
+                                (canvas_y - process.preProcess.height * pp) / 2)) + 1)
 
             mouse.release(button='left')
-            pro += 100 / ea * count
+            clicks += 1
+            pro += (100 / ea) * (2*count)
             prog = "%.2f" % pro
 
-            c += count
+            c += 2*count
 
-            if c >= cc/2:  # and also delete this if it's too slow
+            if clicks >= cc/2:  # and also delete this if it's too slow
                 QtCore.QCoreApplication.processEvents()
-                win.cmdLabel.setText(f"Drawing... {process.finalize.sth} colors are being used {prog}%")
+                win.cmdLabel.setText(f"Drawing... {process.finalize.colornum} colors are being used {prog}%")
                 win.cmdLabel.repaint()
 
                 time.sleep(1 / speed)
                 cc += speed/2
+        return pro
 
-    def drawQuantize():
+    def drawColors():
         e = 0
         b = 0
+        pro = 0
         while e < int((len(palettedata) - 3) / 3):
             if keyboard.is_pressed('q'):  # Failsafe
                 break
             try:
                 if len(pixels[b]) > 2:
-                    drawQuantize1(b, 2)
+                    pro = drawQuantizedColor(b, 2, pro)
                     e += 1
                 b += 1
             except:
@@ -99,9 +90,9 @@ def drawQuantized(image, palettedata, win, speed, pp, offset_x, offset_y, canvas
     process.finalize(pixels, win)
 
     print(f"[DEBUG] drawing quantized lines...")
-    win.cmdLabel.setText(f"Drawing... {process.finalize.sth} colors are being used")
+    win.cmdLabel.setText(f"Drawing... {process.finalize.colornum} colors are being used")
     win.cmdLabel.repaint()
-    drawQuantize()
+    drawColors()
     win.cmdLabel.setText("Finished !")
 
 ##################################################################################################
