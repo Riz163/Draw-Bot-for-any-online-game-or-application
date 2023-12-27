@@ -101,8 +101,9 @@ def drawHuman(contours, avg_len, win, canvas_x, canvas_y, offset_x, offset_y, sp
                                     x[0] + offset_y + int((canvas_y - process.preProcess.height) / 2))
                         break
             
+            pro += 100 / (len(contour[1:])/2 * len(contours))/2 # this progress % is far from good
+
             if n < (len(contours) / 3) or n % 10 == 0:
-                pro += 100 / (len(contour[1:])/2 * len(contours)) # this progress % is far from good
                 prog = "%.2f" % pro
                 win.cmdLabel.setText(f"Drawing... {prog}%")
                 win.cmdLabel.repaint()
