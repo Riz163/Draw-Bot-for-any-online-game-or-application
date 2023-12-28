@@ -12,4 +12,3 @@ PyQt5
 simplification
 scikit-image
 matplotlib
-numpy
