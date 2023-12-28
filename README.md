@@ -16,6 +16,7 @@
 - quantized drawing for faster times (color by color or line by line)
 - settings for colors, brushsize, speed and drawing area
 - supports image urls and file paths inside the url box
+- easy to use graphical user interface
 
 > before running, install the requirements using pip make sure to calibrate it before drawing. In case you need it, 'q' is the failsafe
 >
