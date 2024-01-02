@@ -105,7 +105,7 @@ def drawDithered(image, palettedata, layers, win, speed, pp, offset_x, offset_y,
             b = 0
             if keyboard.is_pressed('q'):  # Failsafe
                 break
-            while e < int((len(palettedata) - 3) / 3):
+            while e < int((len(palettedata) - 3) / 3) - 1:
                 if keyboard.is_pressed('q'):  # Failsafe
                     break
                 if len(pixels[b]) > 2:
