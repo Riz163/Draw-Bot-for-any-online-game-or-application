@@ -37,7 +37,7 @@ def getImage(win):
 def ProcessingError(win):
     win.cmdLabel.setText("Failed Processing...\nEnter a valid url (and) or choose another image")
     print("[DEBUG] failed processing...")
-    # traceback.print_exc()
+    traceback.print_exc()
 
 def preProcess(image, pp, x, y):
     im = image

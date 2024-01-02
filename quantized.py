@@ -35,6 +35,7 @@ def drawQuantized(image, palettedata, win, speed, pp, offset_x, offset_y, canvas
         clicks = 0
         pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
         pyautogui.click()
+        
         while c < len(pixels[b]):
 
             if keyboard.is_pressed('q'):  # Failsafe

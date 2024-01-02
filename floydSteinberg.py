@@ -49,7 +49,7 @@ def drawDithered(image, palettedata, layers, win, speed, pp, offset_x, offset_y,
                 if c >= cc:  # this is where speed setting has an action
                     time.sleep(0.05)  # every time the number of drawn pixels is too high it pauses
                     QtCore.QCoreApplication.processEvents()
-                    win.cmdLabel.setText(f"Drawing... {process.finalize.sth} colors are being used {prog}%")
+                    win.cmdLabel.setText(f"Drawing... {process.finalize.colornum} colors are being used {prog}%")
                     win.cmdLabel.repaint()
                     cc += speed
         else:
@@ -57,6 +57,7 @@ def drawDithered(image, palettedata, layers, win, speed, pp, offset_x, offset_y,
             clicks = 0
             pyautogui.moveTo(pixels[b][0], pixels[b][1], 0)  # selects the right color first
             pyautogui.click()
+
             while c < len(pixels[b]):
 
                 if keyboard.is_pressed('q'):  # Failsafe
@@ -87,7 +88,7 @@ def drawDithered(image, palettedata, layers, win, speed, pp, offset_x, offset_y,
                 if clicks >= cc / 4:  # and also delete this if it's too slow
                     QtCore.QCoreApplication.processEvents()
                     win.cmdLabel.setText(
-                        f"Drawing... {process.finalize.sth} colors are being used {prog}%")
+                        f"Drawing... {process.finalize.colornum} colors are being used {prog}%")
                     win.cmdLabel.repaint()
                     cc += speed / 2
                     time.sleep(1 / speed)
@@ -107,14 +108,11 @@ def drawDithered(image, palettedata, layers, win, speed, pp, offset_x, offset_y,
             while e < int((len(palettedata) - 3) / 3):
                 if keyboard.is_pressed('q'):  # Failsafe
                     break
-                try:
-                    if len(pixels[b]) > 2:
-                        pro = drawColor(b, c, layers, pro)  # draw one color
-                        print(f"[DEBUG] {b} colors drawn")
-                        e += 1
-                    b += 1
-                except:
-                    break
+                if len(pixels[b]) > 2:
+                    pro = drawColor(b, c, layers, pro)  # draw one color
+                    print(f"[DEBUG] {b} colors drawn")
+                    e += 1
+                b += 1
             c += 2
             z += 1
 
@@ -127,7 +125,7 @@ def drawDithered(image, palettedata, layers, win, speed, pp, offset_x, offset_y,
             if keyboard.is_pressed('q'):  # Failsafe
                 break
             try:
-                if e > int(process.finalize.sth * 3 / 4):  # <-- the last number determines which colors should
+                if e > int(process.finalize.colornum * 3 / 4):  # <-- the last number determines which colors should
                     layers = 2  # be split in 2 layers here for eg (1 - 2/3) = 1/3, so one third of the colors will be
                     c = 4  # drawn twice. the later colors are the ones with the most pixels because they get sorted
                     pro = drawColor(b, c, layers, pro)
