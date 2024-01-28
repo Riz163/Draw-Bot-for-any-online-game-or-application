@@ -27,7 +27,7 @@
 ![image](https://github.com/Nuspli/Draw-Bot-for-any-online-game-or-application/assets/108233076/9d3e71c7-b6f5-4b2c-a881-7a86930f2dc2)
 
 - `brush size` depends on how many pixels in a row your selected brush covers. most of the time this will not be one since most brushes cover more that a single pixel. the image will get scaled according to this size
-- `layers only` affect the floyd steinberg dithering option. 1 layer is usually fine, but if that takes too long you can choose to skip every 2nd, 3rd, 4th, ... pixel by splitting it into multiple layers. this will give a better overview of the full picture. checking the adaptive checkbox will only draw the last 3rd of the colors as 2 layers
+- `layers` only affect the floyd steinberg dithering option. 1 layer is usually fine, but if that takes too long you can choose to skip every 2nd, 3rd, 4th, ... pixel by splitting it into multiple layers. this will give a better overview of the full picture. checking the adaptive checkbox will only draw the last 3rd of the colors as 2 layers
 - to choose the colors and drawing area, click on the calibration buttons and follow the instructions
 - `Image URL` accepts system file paths and image links aswell as some dropped images from google (experimental)
 
